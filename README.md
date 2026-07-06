@@ -1,80 +1,115 @@
-# Matumaini - SDA Hymnal App
+# Matumaini
 
-## Stage 1 - Foundation (COMPLETE)
+Matumaini is an advanced Seventh-day Adventist hymnal platform built with Flutter and Drift. It provides offline access to thousands of hymns across multiple languages, with four-layer search, MIDI playback, and worship program planning.
 
-### Project Structure
+## Current State: v0.1.0-dev
+
+### Included in this release
+
+- **Flutter app scaffold** with Riverpod state management
+- **Drift/SQLite database** with 14 tables, FTS5 trigram search, and VSS vector-search triggers
+- **952 English hymns** from SDA Hymnal 1985 (689 real entries + 263 extended supplement placeholders)
+- **271 Swahili hymns** (titles only; verse text pending)
+- **16,554 English verse entries** imported into the local database for offline reading
+- **6 bundled MIDI files** for playback MVP
+- **Core screens:** Home, Search, Reader, Programs, Settings, About
+- **Data pipeline:** Python acquisition scripts export JSON/SQLite assets consumed by the Flutter runtime seeder
+- **GitHub Actions workflow** to build release APKs automatically when a new tag is pushed
+
+### Build instructions
+
+#### Prerequisites
+
+- Flutter SDK 3.24+
+- Android SDK for APK builds
+
+#### Local build
+
+```bash
+cd matumaini
+./build.sh
+```
+
+The build script will:
+1. Initialize platform directories if missing
+2. Run `flutter pub get`
+3. Generate Drift code (`flutter pub run build_runner build --delete-conflicting-outputs`)
+4. Run `flutter analyze`
+5. Build and optionally launch the debug app
+
+#### Automated APK release
+
+To generate a downloadable APK:
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+GitHub Actions will automatically build the release APK and attach it to the GitHub Release.
+
+### Project structure
+
 ```
 lib/
+├── main.dart                          # App entry + DataSeeder bootstrap
 ├── core/
-│   ├── database/
-│   │   ├── database.dart      # Drift database setup with migrations
-│   │   └── tables.dart        # All table definitions
 │   ├── constants/
-│   │   ├── colors.dart        # All theme colors as Color constants
-│   │   ├── typography.dart    # Fonts, sizes, styles as Dart constants
-│   │   └── enums.dart         # All enums for occasion, tempo, etc.
+│   │   ├── colors.dart                # Deep Space default theme + premium themes
+│   │   ├── enums.dart                 # 16 domain enums
+│   │   └── typography.dart            # Font families, text styles, spacing
+│   ├── database/
+│   │   ├── tables.dart                # 14 Drift tables
+│   │   ├── database.dart              # AppDatabase + FTS5/VSS migration strategy
+│   │   └── data_seeder.dart           # Runtime JSON→Drift importer
 │   └── providers/
-│       └── database_providers.dart  # Riverpod providers for all tables
-├── features/
-│   ├── hymn_reader/
-│   ├── search/
-│   ├── worship_program/
-│   ├── favorites/
-│   └── settings/
-└── main.dart
+│       ├── database_providers.dart    # Riverpod databaseProvider
+│       └── app_providers.dart         # FutureProviders + repository providers
+├── models/
+│   ├── hymn.dart
+│   ├── hymn_verse.dart
+│   └── collection.dart
+├── repositories/
+│   ├── hymn_repository.dart
+│   └── collection_repository.dart
+└── screens/
+    ├── home/home_screen.dart
+    ├── search/search_screen.dart
+    ├── reader/reader_screen.dart
+    ├── programs/programs_screen.dart
+    ├── programs/program_detail_screen.py
+    ├── settings/settings_screen.dart
+    └── about/about_screen.dart
 ```
 
-### Design Decisions & Assumptions
+### Data pipeline
 
-1. **Enum Storage**: Occasion, TempoCategory, CopyrightStatus, VerseType, RelationshipType, and ItemType are stored as TEXT in SQLite with validation in Dart layer. This allows for easy querying and extensibility.
+```
+Platform acquisition (Python)
+    ↓ export_to_flutter.py
+assets/data/
+    ├── english_hymns.json
+    ├── english_verses.json
+    ├── swahili_hymns.json
+    └── midi_files.json
+    ↓ runtime seeder (Dart)
+Drift SQLite (on-device)
+```
 
-2. **UserSettings.id**: Uses `clientDefault(() => 1)` with a single row pattern. Application must ensure only one settings row exists.
+## Next release: v0.2.0
 
-3. **HymnNumber Nullable**: Indigenous songs without numbers have `hymnNumber = null`.
+### Planned
 
-4. **Full Text Search**: Drift's FTS5 support requires virtual tables or triggers. The `lyrics_normalized` field stores pre-normalized text (lowercase, diacritics removed) for search matching.
+- [ ] Real verse text for Swahili hymns (271 entries)
+- [ ] Real verse text for Extended Supplement (696-952)
+- [ ] Favorites + folders wired to UI
+- [ ] RevenueCat premium integration
+- [ ] Custom fonts (Lora/Inter) bundled
+- [ ] MIDI piano-roll playback with `flutter_midi_pro`
+- [ ] MiniLM-L6-v2 semantic search via ONNX runtime
+- [ ] Intro animation (Rive)
+- [ ] Production hardening: testing, accessibility, store assets
 
-5. **Color Imports**: Uses `dart:ui` directly for Color class since the constants are pure data.
+## License
 
-6. **Font Assets**: Fonts referenced in pubspec.yaml but actual font files must be downloaded and placed in assets/fonts/.
-
-7. **MIDI Assets**: `midi_asset_path` stores relative path within `assets/midi/` directory.
-
-8. **activeCollectionIds**: JSON array stored as TEXT — parsed on read, serialized on write.
-
-9. **Theme System**: SYSTEM theme follows OS dark/light mode — handled in UI layer, not database.
-
-8. **Collection Codes**: 
-   - SDA_HYMNAL
-   - SDA_EXTENDED  
-   - NYIMBO_ZA_KRISTO
-   - KISII_SDA
-   - KALENJIN_SDA
-   - DHOLUO_SDA
-
-### Database Schema Summary
-
-| Table | Primary Key | Foreign Keys | Notes |
-|-------|-------------|--------------|-------|
-| collections | id (auto-increment) | - | 6 predefined collections |
-| hymns | id (auto-increment) | collection_id → collections | INDEX on (collection_id, hymn_number), tune_name |
-| hymn_verses | id (auto-increment) | hymn_id → hymns | INDEX on (hymn_id, verse_number) |
-| hymn_cross_reference | id (auto-increment) | hymn_id, related_hymn_id → hymns | Links translations/same_tune/thematic |
-| topical_index | id (auto-increment) | - | Categories like Adoration, Faith, Grace |
-| hymn_topics | (hymn_id, topic_id) compound PK | Both → respective tables | Many-to-many relation |
-| midi_tunes | id (auto-increment) | - | Unique tune_name, 400-500 unique tunes |
-| user_settings | id (always 1) | - | Single row, user preferences |
-| user_favorites | hymn_id (PK) | hymn_id → hymns | Optional folder for organization |
-| worship_programs | id (auto-increment) | - | Program metadata |
-| program_items | id (auto-increment) | program_id → worship_programs, hymn_id → hymns | Items in programs |
-
-### TODO - Remaining Stages
-- [ ] Stage 2: Data import (SDA Hymnal 695 entries, MIDI mappings)
-- [ ] Stage 3: Core hymn reader with MIDI playback
-- [ ] Stage 4: Search and navigation
-- [ ] Stage 5: Freemium integration (RevenueCat)
-- [ ] Stage 6: Kenyan language collections
-- [ ] Stage 7: Worship program builder
-- [ ] Stage 8: Home screen + polish
-- [ ] Stage 9: Intro animation (Rive)
-- [ ] Stage 10: Production (assets, testing, store submission)
+Pending copyright review for bundled hymn texts and MIDI assets.

@@ -21,13 +21,12 @@ class DataSeeder {
     }
 
     print('Seeding database...');
-    await _seedCollections();
-    await _seedEnglishHymns();
-    await _seedSwahiliHymns();
+    final hymnNumberToId = await _seedCollectionsAndHymns();
+    await _seedEnglishVerses(hymnNumberToId);
     print('Database seeding complete.');
   }
 
-  Future<void> _seedCollections() async {
+  Future<Map<int, int>> _seedCollectionsAndHymns() async {
     final collections = [
       {
         'code': 'en_sda_1985',
@@ -59,8 +58,10 @@ class DataSeeder {
       },
     ];
 
+    // Insert collections and build code -> id map
+    final Map<String, int> collectionCodeToId = {};
     for (final collection in collections) {
-      await db.into(db.collections).insert(
+      final id = await db.into(db.collections).insert(
         CollectionsCompanion.insert(
           code: collection['code'] as String,
           name: collection['name'] as String,
@@ -84,88 +85,118 @@ class DataSeeder {
           updatedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
         ),
       );
+      collectionCodeToId[collection['code'] as String] = id;
     }
-  }
 
-  Future<void> _seedEnglishHymns() async {
-    final jsonString = await rootBundle.loadString('assets/data/english_hymns.json');
-    final data = jsonDecode(jsonString) as Map<String, dynamic>;
-    final hymns = data['hymns'] as List<dynamic>;
+    final int enCollectionId = collectionCodeToId['en_sda_1985'] ?? 1;
+    final int swCollectionId = collectionCodeToId['sw_nyimbo_za_kristo'] ?? 2;
 
-    final batch = db.batch(() {});
+    // Seed English hymns
+    final Map<int, int> hymnNumberToId = {};
+    final enJson = await rootBundle.loadString('assets/data/english_hymns.json');
+    final enData = jsonDecode(enJson) as Map<String, dynamic>;
+    final enHymns = enData['hymns'] as List<dynamic>;
+
     var inserted = 0;
-
-    for (final hymn in hymns) {
+    for (final hymn in enHymns) {
       final map = hymn as Map<String, dynamic>;
-      final collectionId = map['data_quality'] == 2 ? 1 : 1; // All in SDA 1985 collection for now
-
-      batch.insert(db.hymns, HymnsCompanion.insert(
-        collectionId: collectionId,
-        hymnNumber: Value(map['hymn_number'] as int?),
-        title: map['title'] as String,
-        titleNormalized: (map['title'] as String).toLowerCase(),
-        firstLine: Value(map['first_line'] as String?),
-        firstLineNormalized: Value(map['first_line'] != null ? (map['first_line'] as String).toLowerCase() : null),
-        tuneName: Value(map['tune_name'] as String?),
-        meter: Value(map['meter'] as String?),
-        scriptureRefs: Value(map['scripture_ref'] as String?),
-        occasions: const Value('["GENERAL"]'),
-        tempoCategory: const Value('MEDIUM'),
-        difficulty: const Value('CONGREGATIONAL'),
-        voicing: const Value('SATB'),
-        copyrightStatus: const Value('PUBLIC_DOMAIN'),
-        createdAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-        updatedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-      ));
-
+      final hymnNumber = map['hymn_number'] as int;
+      final id = await db.into(db.hymns).insert(
+        HymnsCompanion.insert(
+          collectionId: enCollectionId,
+          hymnNumber: Value(hymnNumber),
+          title: map['title'] as String,
+          titleNormalized: (map['title'] as String).toLowerCase(),
+          firstLine: Value(map['first_line'] as String?),
+          firstLineNormalized: Value(map['first_line'] != null ? (map['first_line'] as String).toLowerCase() : null),
+          tuneName: Value(map['tune_name'] as String?),
+          meter: Value(map['meter'] as String?),
+          scriptureRefs: Value(map['scripture_ref'] as String?),
+          occasions: const Value('["GENERAL"]'),
+          tempoCategory: const Value('MEDIUM'),
+          difficulty: const Value('CONGREGATIONAL'),
+          voicing: const Value('SATB'),
+          copyrightStatus: const Value('PUBLIC_DOMAIN'),
+          createdAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+          updatedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+        ),
+      );
+      hymnNumberToId[hymnNumber] = id;
       inserted++;
       if (inserted % 100 == 0) {
-        await batch.commit();
-        print('Inserted $inserted English hymns...');
+        print('  Inserted $inserted English hymns...');
       }
     }
+    print('  Total English hymns inserted: $inserted');
 
-    await batch.commit();
-    print('Total English hymns inserted: $inserted');
-  }
-
-  Future<void> _seedSwahiliHymns() async {
-    final jsonString = await rootBundle.loadString('assets/data/swahili_hymns.json');
-    final data = jsonDecode(jsonString) as Map<String, dynamic>;
-    final hymns = data['hymns'] as List<dynamic>;
-
-    final batch = db.batch(() {});
-    var inserted = 0;
-
-    for (final hymn in hymns) {
+    // Seed Swahili hymns
+    final swJson = await rootBundle.loadString('assets/data/swahili_hymns.json');
+    final swData = jsonDecode(swJson) as Map<String, dynamic>;
+    final swHymns = swData['hymns'] as List<dynamic>;
+    inserted = 0;
+    for (final hymn in swHymns) {
       final map = hymn as Map<String, dynamic>;
-
-      batch.insert(db.hymns, HymnsCompanion.insert(
-        collectionId: 2, // Swahili collection
-        hymnNumber: Value(map['hymn_number'] as int?),
-        title: map['title'] as String,
-        titleNormalized: (map['title'] as String).toLowerCase(),
-        firstLine: Value(map['first_line'] as String?),
-        firstLineNormalized: Value(map['first_line'] != null ? (map['first_line'] as String).toLowerCase() : null),
-        tuneName: Value(map['tune_name'] as String?),
-        scriptureRefs: const Value(null),
-        occasions: const Value('["GENERAL"]'),
-        tempoCategory: const Value('MEDIUM'),
-        difficulty: const Value('CONGREGATIONAL'),
-        voicing: const Value('SATB'),
-        copyrightStatus: const Value('PUBLIC_DOMAIN'),
-        createdAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-        updatedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-      ));
-
+      final hymnNumber = map['hymn_number'] as int;
+      await db.into(db.hymns).insert(
+        HymnsCompanion.insert(
+          collectionId: swCollectionId,
+          hymnNumber: Value(hymnNumber),
+          title: map['title'] as String,
+          titleNormalized: (map['title'] as String).toLowerCase(),
+          firstLine: Value(map['first_line'] as String?),
+          firstLineNormalized: Value(map['first_line'] != null ? (map['first_line'] as String).toLowerCase() : null),
+          tuneName: Value(map['tune_name'] as String?),
+          scriptureRefs: const Value(null),
+          occasions: const Value('["GENERAL"]'),
+          tempoCategory: const Value('MEDIUM'),
+          difficulty: const Value('CONGREGATIONAL'),
+          voicing: const Value('SATB'),
+          copyrightStatus: const Value('PUBLIC_DOMAIN'),
+          createdAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+          updatedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
+        ),
+      );
+      hymnNumberToId[hymnNumber] = id;
       inserted++;
       if (inserted % 50 == 0) {
-        await batch.commit();
-        print('Inserted $inserted Swahili hymns...');
+        print('  Inserted $inserted Swahili hymns...');
       }
     }
+    print('  Total Swahili hymns inserted: $inserted');
 
-    await batch.commit();
-    print('Total Swahili hymns inserted: $inserted');
+    return hymnNumberToId;
+  }
+
+  Future<void> _seedEnglishVerses(Map<int, int> hymnNumberToId) async {
+    final jsonString = await rootBundle.loadString('assets/data/english_verses.json');
+    final data = jsonDecode(jsonString) as Map<String, dynamic>;
+    final verses = data['verses'] as List<dynamic>;
+
+    var inserted = 0;
+    for (final verse in verses) {
+      final map = verse as Map<String, dynamic>;
+      final hymnNumber = map['hymn_number'] as int;
+      final hymnId = hymnNumberToId[hymnNumber];
+      if (hymnId == null) {
+        continue;
+      }
+
+      await db.into(db.hymnVerses).insert(
+        HymnVersesCompanion.insert(
+          hymnId: hymnId,
+          verseType: map['verse_type'] as String,
+          verseNumber: Value(map['verse_number'] as int?),
+          lyrics: map['lyrics'] as String,
+          lyricsNormalized: (map['lyrics_normalized'] as String?) ?? '',
+          displayOrder: (map['display_order'] as int?) ?? 0,
+        ),
+      );
+
+      inserted++;
+      if (inserted % 500 == 0) {
+        print('  Inserted $inserted verses...');
+      }
+    }
+    print('  Total English verses inserted: $inserted');
   }
 }

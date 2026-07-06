@@ -4,6 +4,7 @@ import 'package:matumaini/core/constants/colors.dart';
 import 'package:matumaini/screens/home/home_screen.dart';
 import 'package:matumaini/screens/search/search_screen.dart';
 import 'package:matumaini/screens/programs/programs_screen.dart';
+import 'package:matumaini/screens/settings/settings_screen.dart';
 
 class MainShell extends ConsumerStatefulWidget {
   const MainShell({super.key});
@@ -19,6 +20,7 @@ class _MainShellState extends ConsumerState<MainShell> {
     HomeScreen(),
     SearchScreen(),
     ProgramsScreen(),
+    SettingsScreen(),
   ];
 
   @override
@@ -54,6 +56,11 @@ class _MainShellState extends ConsumerState<MainShell> {
             icon: Icon(Icons.event),
             activeIcon: Icon(Icons.event_available),
             label: 'Programs',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            activeIcon: Icon(Icons.settings_rounded),
+            label: 'Settings',
           ),
         ],
       ),
