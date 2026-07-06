@@ -17,6 +17,9 @@ jobs:
           flutter-version: '3.24.0'
           channel: 'stable'
 
+      - name: Initialize Flutter project
+        run: flutter create -t app .
+
       - name: Install dependencies
         run: flutter pub get
 
