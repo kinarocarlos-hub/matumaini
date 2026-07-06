@@ -19,8 +19,6 @@ dependencies:
   purchases_flutter: ^10.4.0
   flutter_svg: ^2.0.10
   url_launcher: ^6.2.5
-  freezed_annotation: ^2.4.4
-  json_annotation: ^4.9.1
   equatable: ^2.0.5
   intl: ^0.19.0
 
@@ -29,8 +27,6 @@ dev_dependencies:
     sdk: flutter
   build_runner: ^2.4.13
   drift_dev: ^2.18.0
-  freezed: ^2.5.7
-  json_serializable: ^6.9.3
 
 flutter:
   uses-material-design: true
