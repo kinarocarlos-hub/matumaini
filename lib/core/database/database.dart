@@ -390,6 +390,11 @@ class AppDatabase {
     return _connection.executor.customSelect(sql, variables: variables);
   }
 
+  Future<Map<String, dynamic>?> customSelectOne(String sql, {List<Variable>? variables}) async {
+    final results = await _connection.executor.customSelect(sql, variables: variables);
+    return results.isNotEmpty ? results.first.data : null;
+  }
+
   Future<void> customExecute(String sql, {List<Variable>? variables}) async {
     return _connection.executor.execute(sql, variables: variables);
   }

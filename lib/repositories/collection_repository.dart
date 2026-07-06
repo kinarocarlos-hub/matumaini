@@ -19,37 +19,13 @@ class CollectionRepository {
              license_expiry as licenseExpiry, display_order as displayOrder
       FROM collections
       ORDER BY display_order
-    ''').get();
+    ''');
 
-    return results.map((row) {
-      final data = row.data;
-      return Collection(
-        id: data['id'] as int,
-        code: data['code'] as String,
-        name: data['name'] as String,
-        nameNative: data['nameNative'] as String?,
-        languageCode: data['languageCode'] as String,
-        languageNameEnglish: data['languageNameEnglish'] as String,
-        languageNameNative: data['languageNameNative'] as String,
-        fontFamily: data['fontFamily'] as String? ?? 'lora',
-        specialCharacters: data['specialCharacters'] as String?,
-        tier: data['tier'] as int,
-        totalSongs: data['totalSongs'] as int? ?? 0,
-        isBundled: (data['isBundled'] as int? ?? 0) == 1,
-        requiresPremium: (data['requiresPremium'] as int? ?? 0) == 1,
-        downloadSizeMb: (data['downloadSizeMb'] as double?) ??
-            ((data['downloadSizeMb'] as int?)?.toDouble()),
-        isDownloaded: (data['isDownloaded'] as int? ?? 0) == 1,
-        sourceOrganization: data['sourceOrganization'] as String?,
-        licenseType: data['licenseType'] as String? ?? 'PENDING',
-        licenseExpiry: data['licenseExpiry'] as int?,
-        displayOrder: data['displayOrder'] as int? ?? 0,
-      );
-    }).toList();
+    return results.map((row) => _toModel(row.data)).toList();
   }
 
   Future<Collection?> getCollectionByCode(String code) async {
-    final result = await (db.customSelect('''
+    final data = await db.customSelectOne('''
       SELECT id, code, name, name_native as nameNative, language_code as languageCode,
              language_name_english as languageNameEnglish, language_name_native as languageNameNative,
              font_family as fontFamily, special_characters as specialCharacters, tier,
@@ -59,10 +35,13 @@ class CollectionRepository {
              license_expiry as licenseExpiry, display_order as displayOrder
       FROM collections
       WHERE code = ?
-    ''', variables: [Variable(code)])).getSingleOrNull();
+    ''', variables: [Variable(code)]);
 
-    if (result == null) return null;
-    final data = result.data;
+    if (data == null) return null;
+    return _toModel(data);
+  }
+
+  Collection _toModel(Map<String, dynamic> data) {
     return Collection(
       id: data['id'] as int,
       code: data['code'] as String,

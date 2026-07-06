@@ -10,8 +10,8 @@ class DataSeeder {
   DataSeeder(this.db);
 
   Future<bool> isDatabaseEmpty() async {
-    final count = await db.customSelect('SELECT COUNT(*) as count FROM hymns').getSingle();
-    return count.data['count'] == 0;
+    final count = await db.customSelectOne('SELECT COUNT(*) as count FROM hymns');
+    return (count?['count'] as int) == 0;
   }
 
   Future<void> seedIfEmpty() async {
@@ -119,7 +119,7 @@ class DataSeeder {
     for (final hymn in swHymns) {
       final map = hymn as Map<String, dynamic>;
       final hymnNumber = map['hymn_number'] as int;
-      await db.customInsert('''
+      final id = await db.customInsert('''
         INSERT INTO hymns (collection_id, hymn_number, title, title_normalized, first_line, first_line_normalized,
                            scripture_refs, occasions, tempo_category, difficulty, voicing, copyright_status,
                            created_at, updated_at)

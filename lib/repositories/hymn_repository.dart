@@ -22,40 +22,13 @@ class HymnRepository {
              created_at as createdAt, updated_at as updatedAt
       FROM hymns
       ORDER BY collection_id, hymn_number
-    ''').get();
+    ''');
 
-    return results.map((row) {
-      final data = row.data;
-      return Hymn(
-        id: data['id'] as int,
-        hymnNumber: data['hymnNumber'] as int?,
-        title: data['title'] as String,
-        firstLine: data['firstLine'] as String?,
-        tuneName: data['tuneName'] as String?,
-        meter: data['meter'] as String?,
-        scriptureRefs: data['scriptureRefs'] as String? ?? '',
-        occasions: const <String>[],
-        emotionalTones: const <String>[],
-        tempoCategory: 'MEDIUM',
-        difficulty: 'CONGREGATIONAL',
-        voicing: 'SATB',
-        copyrightStatus: 'PUBLIC_DOMAIN',
-        hasMidi: (data['hasMidi'] as int? ?? 0) == 1,
-        hasChords: (data['hasChords'] as int? ?? 0) == 1,
-        midiAssetPath: data['midiAssetPath'] as String?,
-        dialect: data['dialect'] as String?,
-        sourceAttribution: data['sourceAttribution'] as String?,
-        isCommunityContributed: (data['isCommunityContributed'] as int? ?? 0) == 1,
-        useCount: data['useCount'] as int? ?? 0,
-        lastUsed: data['lastUsed'] as int?,
-        createdAt: data['createdAt'] as int,
-        updatedAt: data['updatedAt'] as int,
-      );
-    }).toList();
+    return results.map((row) => _toModel(row.data)).toList();
   }
 
   Future<Hymn?> getHymnById(int id) async {
-    final result = await (db.customSelect('''
+    final data = await db.customSelectOne('''
       SELECT id, collection_id as collectionId, hymn_number as hymnNumber,
              title, first_line as firstLine, tune_name as tuneName, meter,
              scripture_refs as scriptureRefs, has_midi as hasMidi,
@@ -66,39 +39,14 @@ class HymnRepository {
              created_at as createdAt, updated_at as updatedAt
       FROM hymns
       WHERE id = ?
-    ''', variables: [Variable(id)])).getSingleOrNull();
+    ''', variables: [Variable(id)]);
 
-    if (result == null) return null;
-    final data = result.data;
-    return Hymn(
-      id: data['id'] as int,
-      hymnNumber: data['hymnNumber'] as int?,
-      title: data['title'] as String,
-      firstLine: data['firstLine'] as String?,
-      tuneName: data['tuneName'] as String?,
-      meter: data['meter'] as String?,
-      scriptureRefs: data['scriptureRefs'] as String? ?? '',
-      occasions: const <String>[],
-      emotionalTones: const <String>[],
-      tempoCategory: 'MEDIUM',
-      difficulty: 'CONGREGATIONAL',
-      voicing: 'SATB',
-      copyrightStatus: 'PUBLIC_DOMAIN',
-      hasMidi: (data['hasMidi'] as int? ?? 0) == 1,
-      hasChords: (data['hasChords'] as int? ?? 0) == 1,
-      midiAssetPath: data['midiAssetPath'] as String?,
-      dialect: data['dialect'] as String?,
-      sourceAttribution: data['sourceAttribution'] as String?,
-      isCommunityContributed: (data['isCommunityContributed'] as int? ?? 0) == 1,
-      useCount: data['useCount'] as int? ?? 0,
-      lastUsed: data['lastUsed'] as int?,
-      createdAt: data['createdAt'] as int,
-      updatedAt: data['updatedAt'] as int,
-    );
+    if (data == null) return null;
+    return _toModel(data);
   }
 
   Future<Hymn?> getHymnByNumber(int number, int collectionId) async {
-    final result = await (db.customSelect('''
+    final data = await db.customSelectOne('''
       SELECT id, collection_id as collectionId, hymn_number as hymnNumber,
              title, first_line as firstLine, tune_name as tuneName, meter,
              scripture_refs as scriptureRefs, has_midi as hasMidi,
@@ -109,35 +57,10 @@ class HymnRepository {
              created_at as createdAt, updated_at as updatedAt
       FROM hymns
       WHERE hymn_number = ? AND collection_id = ?
-    ''', variables: [Variable(number), Variable(collectionId)])).getSingleOrNull();
+    ''', variables: [Variable(number), Variable(collectionId)]);
 
-    if (result == null) return null;
-    final data = result.data;
-    return Hymn(
-      id: data['id'] as int,
-      hymnNumber: data['hymnNumber'] as int?,
-      title: data['title'] as String,
-      firstLine: data['firstLine'] as String?,
-      tuneName: data['tuneName'] as String?,
-      meter: data['meter'] as String?,
-      scriptureRefs: data['scriptureRefs'] as String? ?? '',
-      occasions: const <String>[],
-      emotionalTones: const <String>[],
-      tempoCategory: 'MEDIUM',
-      difficulty: 'CONGREGATIONAL',
-      voicing: 'SATB',
-      copyrightStatus: 'PUBLIC_DOMAIN',
-      hasMidi: (data['hasMidi'] as int? ?? 0) == 1,
-      hasChords: (data['hasChords'] as int? ?? 0) == 1,
-      midiAssetPath: data['midiAssetPath'] as String?,
-      dialect: data['dialect'] as String?,
-      sourceAttribution: data['sourceAttribution'] as String?,
-      isCommunityContributed: (data['isCommunityContributed'] as int? ?? 0) == 1,
-      useCount: data['useCount'] as int? ?? 0,
-      lastUsed: data['lastUsed'] as int?,
-      createdAt: data['createdAt'] as int,
-      updatedAt: data['updatedAt'] as int,
-    );
+    if (data == null) return null;
+    return _toModel(data);
   }
 
   Future<List<HymnVerse>> getVersesForHymn(int hymnId) async {
@@ -149,23 +72,9 @@ class HymnRepository {
       FROM hymn_verses
       WHERE hymn_id = ?
       ORDER BY display_order
-    ''', variables: [Variable(hymnId)]).get();
+    ''', variables: [Variable(hymnId)]);
 
-    return results.map((row) {
-      final data = row.data;
-      return HymnVerse(
-        id: data['id'] as int,
-        hymnId: data['hymnId'] as int,
-        verseType: data['verseType'] as String? ?? 'VERSE',
-        verseNumber: data['verseNumber'] as int?,
-        lyrics: data['lyrics'] as String,
-        lyricsNormalized: data['lyricsNormalized'] as String? ?? '',
-        wordCount: data['wordCount'] as int?,
-        displayOrder: data['displayOrder'] as int? ?? 0,
-        midiStartMs: data['midiStartMs'] as int?,
-        midiEndMs: data['midiEndMs'] as int?,
-      );
-    }).toList();
+    return results.map((row) => _verseToModel(row.data)).toList();
   }
 
   Future<List<Hymn>> searchHymns(String query) async {
@@ -184,45 +93,60 @@ class HymnRepository {
       WHERE fts MATCH ?
       ORDER BY rank
       LIMIT 50
-    ''', variables: [Variable(query)]).get();
+    ''', variables: [Variable(query)]);
 
-    return results.map((row) {
-      final data = row.data;
-      return Hymn(
-        id: data['id'] as int,
-        hymnNumber: data['hymnNumber'] as int?,
-        title: data['title'] as String,
-        firstLine: data['firstLine'] as String?,
-        tuneName: data['tuneName'] as String?,
-        meter: data['meter'] as String?,
-        scriptureRefs: data['scriptureRefs'] as String? ?? '',
-        occasions: const <String>[],
-        emotionalTones: const <String>[],
-        tempoCategory: 'MEDIUM',
-        difficulty: 'CONGREGATIONAL',
-        voicing: 'SATB',
-        copyrightStatus: 'PUBLIC_DOMAIN',
-        hasMidi: (data['hasMidi'] as int? ?? 0) == 1,
-        hasChords: (data['hasChords'] as int? ?? 0) == 1,
-        midiAssetPath: data['midiAssetPath'] as String?,
-        dialect: data['dialect'] as String?,
-        sourceAttribution: data['sourceAttribution'] as String?,
-        isCommunityContributed: (data['isCommunityContributed'] as int? ?? 0) == 1,
-        useCount: data['useCount'] as int? ?? 0,
-        lastUsed: data['lastUsed'] as int?,
-        createdAt: data['createdAt'] as int,
-        updatedAt: data['updatedAt'] as int,
-      );
-    }).toList();
+    return results.map((row) => _toModel(row.data)).toList();
   }
 
   Future<void> incrementUseCount(int hymnId) async {
-    await db.customUpdate(
-      'UPDATE hymns SET use_count = use_count + 1, last_used = ? WHERE id = ?',
-      variables: [
-        Variable(DateTime.now().millisecondsSinceEpoch ~/ 1000),
-        Variable(hymnId),
-      ],
+    await db.customUpdate('''
+      UPDATE hymns SET use_count = use_count + 1, last_used = ? WHERE id = ?
+    ''', variables: [
+      Variable(DateTime.now().millisecondsSinceEpoch ~/ 1000),
+      Variable(hymnId),
+    ]);
+  }
+
+  Hymn _toModel(Map<String, dynamic> data) {
+    return Hymn(
+      id: data['id'] as int,
+      hymnNumber: data['hymnNumber'] as int?,
+      title: data['title'] as String,
+      firstLine: data['firstLine'] as String?,
+      tuneName: data['tuneName'] as String?,
+      meter: data['meter'] as String?,
+      scriptureRefs: data['scriptureRefs'] as String? ?? '',
+      occasions: const <String>[],
+      emotionalTones: const <String>[],
+      tempoCategory: 'MEDIUM',
+      difficulty: 'CONGREGATIONAL',
+      voicing: 'SATB',
+      copyrightStatus: 'PUBLIC_DOMAIN',
+      hasMidi: (data['hasMidi'] as int? ?? 0) == 1,
+      hasChords: (data['hasChords'] as int? ?? 0) == 1,
+      midiAssetPath: data['midiAssetPath'] as String?,
+      dialect: data['dialect'] as String?,
+      sourceAttribution: data['sourceAttribution'] as String?,
+      isCommunityContributed: (data['isCommunityContributed'] as int? ?? 0) == 1,
+      useCount: data['useCount'] as int? ?? 0,
+      lastUsed: data['lastUsed'] as int?,
+      createdAt: data['createdAt'] as int,
+      updatedAt: data['updatedAt'] as int,
+    );
+  }
+
+  HymnVerse _verseToModel(Map<String, dynamic> data) {
+    return HymnVerse(
+      id: data['id'] as int,
+      hymnId: data['hymnId'] as int,
+      verseType: data['verseType'] as String? ?? 'VERSE',
+      verseNumber: data['verseNumber'] as int?,
+      lyrics: data['lyrics'] as String,
+      lyricsNormalized: data['lyricsNormalized'] as String? ?? '',
+      wordCount: data['wordCount'] as int?,
+      displayOrder: data['displayOrder'] as int? ?? 0,
+      midiStartMs: data['midiStartMs'] as int?,
+      midiEndMs: data['midiEndMs'] as int?,
     );
   }
 }
