@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:drift/dart.dart';
+import 'package:drift/drift.dart';
 import 'package:matumaini/core/database/database.dart';
 
 class DataSeeder {

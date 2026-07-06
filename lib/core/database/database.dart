@@ -5,17 +5,19 @@ import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 
-class AppDatabase extends LazyDatabase {
-  AppDatabase();
+class AppDatabase {
+  late final LazyDatabase _lazy;
+  late final DatabaseConnection _connection;
 
-  @override
-  LazyDatabaseOpenResult open() {
-    return LazyDatabaseOpenResult(NativeDatabase(_openConnection()));
+  AppDatabase() {
+    _lazy = LazyDatabase(() async {
+      return NativeDatabase(_openConnection());
+    });
   }
 
   Future<void> onCreate() async {
-    final connection = _openConnection();
-    final db = connection.executor;
+    _connection = await _lazy.open();
+    final db = _connection.executor;
 
     await db.runInTransaction(() async {
       await db.customStatement('''
@@ -289,29 +291,17 @@ class AppDatabase extends LazyDatabase {
 
       await db.customStatement('''
         CREATE VIRTUAL TABLE IF NOT EXISTS hymns_fts USING fts5(
-          hymn_id UNINDEXED,
-          title,
-          first_line,
-          all_verses_text,
-          composer_name,
-          lyricist_name,
-          tune_name,
-          scripture_refs_text,
-          language_code UNINDEXED,
-          tokenize='trigram'
+          hymn_id UNINDEXED, title, first_line, all_verses_text,
+          composer_name, lyricist_name, tune_name, scripture_refs_text,
+          language_code UNINDEXED, tokenize='trigram'
         )
       ''');
 
       await db.customStatement('''
         CREATE VIRTUAL TABLE IF NOT EXISTS verses_fts USING fts5(
-          verse_id UNINDEXED,
-          hymn_id UNINDEXED,
-          lyrics,
-          lyrics_normalized,
-          verse_type UNINDEXED,
-          verse_number UNINDEXED,
-          language_code UNINDEXED,
-          tokenize='trigram'
+          verse_id UNINDEXED, hymn_id UNINDEXED, lyrics,
+          lyrics_normalized, verse_type UNINDEXED, verse_number UNINDEXED,
+          language_code UNINDEXED, tokenize='trigram'
         )
       ''');
 
@@ -392,6 +382,26 @@ class AppDatabase extends LazyDatabase {
         END
       ''');
     });
+  }
+
+  QueryExecutor get executor => _connection.executor;
+
+  Future<List<Map<String, dynamic>>> customSelect(String sql, {List<Variable>? variables}) async {
+    return _connection.executor.customSelect(sql, variables: variables);
+  }
+
+  Future<void> customExecute(String sql, {List<Variable>? variables}) async {
+    return _connection.executor.execute(sql, variables: variables);
+  }
+
+  Future<int> customInsert(String sql, {List<Variable>? variables}) async {
+    await _connection.executor.execute(sql, variables: variables);
+    final idResult = await _connection.executor.customSelect('SELECT last_insert_rowid() as id');
+    return idResult.first.data['id'] as int;
+  }
+
+  Future<void> customUpdate(String sql, {List<Variable>? variables}) async {
+    await _connection.executor.execute(sql, variables: variables);
   }
 
   File _openConnection() {
