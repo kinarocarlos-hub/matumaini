@@ -41,3 +41,27 @@ final hymnVersesProvider = FutureProvider.family<List<HymnVerse>, int>((ref, hym
   final repo = ref.watch(hymnRepositoryProvider);
   return repo.getVersesForHymn(hymnId);
 });
+
+final programsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
+  final db = ref.watch(databaseProvider);
+  final results = await db.customSelect('''
+    SELECT id, title, date, church_name as churchName, service_type as serviceType,
+           created_at as createdAt, is_template as isTemplate
+    FROM worship_programs
+    ORDER BY date DESC
+  ''').get();
+  return results.map((r) => r.data).toList();
+});
+
+final programItemsProvider = FutureProvider.family<List<Map<String, dynamic>>, int>((ref, programId) async {
+  final db = ref.watch(databaseProvider);
+  final results = await db.customSelect('''
+    SELECT id, program_id as programId, display_order as displayOrder, item_type as itemType,
+           hymn_id as hymnId, custom_title as customTitle, custom_content as customContent,
+           duration_minutes as durationMinutes, notes, is_complete as isComplete
+    FROM program_items
+    WHERE program_id = ?
+    ORDER BY display_order
+  ''', variables: [Variable(programId)]).get();
+  return results.map((r) => r.data).toList();
+});

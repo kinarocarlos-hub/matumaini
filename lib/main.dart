@@ -9,6 +9,7 @@ import 'package:matumaini/screens/main_shell.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final db = AppDatabase();
+  await db.onCreate();
   final seeder = DataSeeder(db);
   await seeder.seedIfEmpty();
   runApp(ProviderScope(overrides: [

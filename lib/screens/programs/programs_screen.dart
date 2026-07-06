@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:matumaini/core/constants/colors.dart';
 import 'package:matumaini/core/constants/typography.dart';
-import 'package:matumaini/core/providers/database_providers.dart';
-import 'package:matumaini/core/database/database.dart';
+import 'package:matumaini/core/providers/app_providers.dart';
 
 class ProgramsScreen extends ConsumerWidget {
   const ProgramsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final programsAsync = ref.watch(streamWorshipProgramsProvider);
+    final programsAsync = ref.watch(programsProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -194,18 +193,19 @@ class ProgramsScreen extends ConsumerWidget {
             onPressed: () async {
               if (titleController.text.isNotEmpty) {
                 final db = ref.read(databaseProvider);
-                await db.into(db.worshipPrograms).insert(
-                  WorshipProgramsCompanion.insert(
-                    title: titleController.text,
-                    createdAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-                    updatedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-                    churchName: churchController.text.isNotEmpty ? Value(churchController.text) : const Value(null),
-                    notes: notesController.text.isNotEmpty ? Value(notesController.text) : const Value(null),
-                    date: const Value(null),
-                    serviceType: const Value(null),
-                    isTemplate: const Value(false),
-                  ),
-                );
+                await db.customInsert('''
+                  INSERT INTO worship_programs (title, church_name, notes, created_at, updated_at, date, service_type, is_template)
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ''', variables: [
+                  Variable(titleController.text),
+                  Variable(churchController.text.isNotEmpty ? churchController.text : null),
+                  Variable(notesController.text.isNotEmpty ? notesController.text : null),
+                  Variable(DateTime.now().millisecondsSinceEpoch ~/ 1000),
+                  Variable(DateTime.now().millisecondsSinceEpoch ~/ 1000),
+                  const Variable(null),
+                  const Variable(null),
+                  const Variable(0),
+                ]);
                 if (dialogContext.mounted) Navigator.pop(dialogContext);
               }
             },

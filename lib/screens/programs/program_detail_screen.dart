@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:matumaini/core/constants/colors.dart';
 import 'package:matumaini/core/constants/typography.dart';
-import 'package:matumaini/core/providers/database_providers.dart';
+import 'package:matumaini/core/providers/app_providers.dart';
 import 'package:matumaini/core/database/database.dart';
 
 class ProgramDetailScreen extends ConsumerWidget {
@@ -15,7 +15,7 @@ class ProgramDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final programItemsAsync = ref.watch(streamProgramItemsProvider(programId));
+    final programItemsAsync = ref.watch(programItemsProvider(programId));
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -193,20 +193,25 @@ class ProgramDetailScreen extends ConsumerWidget {
             onPressed: () async {
               if (titleController.text.isNotEmpty) {
                 final db = ref.read(databaseProvider);
-                final items = await ref.read(streamProgramItemsProvider(programId).future);
-                await db.into(db.programItems).insert(
-                  ProgramItemsCompanion.insert(
-                    programId: programId,
-                    displayOrder: items.length + 1,
-                    itemType: selectedType,
-                    customTitle: titleController.text,
-                    notes: notesController.text.isNotEmpty ? Value(notesController.text) : const Value(null),
-                    hymnId: const Value(null),
-                    customContent: const Value(null),
-                    durationMinutes: const Value(null),
-                    isComplete: const Value(false),
-                  ),
-                );
+                final countResult = await db.customSelect('''
+                  SELECT COUNT(*) as count FROM program_items WHERE program_id = ?
+                ''', variables: [Variable(programId)]).getSingle();
+                final displayOrder = (countResult.data['count'] as int) + 1;
+
+                await db.customInsert('''
+                  INSERT INTO program_items (program_id, display_order, item_type, custom_title, notes, hymn_id, custom_content, duration_minutes, is_complete)
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', variables: [
+                  Variable(programId),
+                  Variable(displayOrder),
+                  Variable(selectedType),
+                  Variable(titleController.text),
+                  Variable(notesController.text.isNotEmpty ? notesController.text : null),
+                  const Variable(null),
+                  const Variable(null),
+                  const Variable(null),
+                  const Variable(0),
+                ]);
                 if (dialogContext.mounted) Navigator.pop(dialogContext);
               }
             },

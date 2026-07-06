@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:drift/dart.dart';
 import 'package:matumaini/core/database/database.dart';
-import 'package:matumaini/core/database/tables.dart';
 
 class DataSeeder {
   final AppDatabase db;
@@ -27,72 +26,52 @@ class DataSeeder {
   }
 
   Future<Map<int, int>> _seedCollectionsAndHymns() async {
-    final collections = [
-      {
-        'code': 'en_sda_1985',
-        'name': 'SDA Hymnal 1985',
-        'languageCode': 'en',
-        'languageNameEnglish': 'English',
-        'languageNameNative': 'English',
-        'tier': 1,
-        'totalSongs': 952,
-        'isBundled': true,
-        'requiresPremium': false,
-        'sourceOrganization': 'Seventh-day Adventist Church',
-        'licenseType': 'PUBLIC_DOMAIN',
-        'displayOrder': 1,
-      },
-      {
-        'code': 'sw_nyimbo_za_kristo',
-        'name': 'Nyimbo za Kristo',
-        'languageCode': 'sw',
-        'languageNameEnglish': 'Swahili',
-        'languageNameNative': 'Kiswahili',
-        'tier': 1,
-        'totalSongs': 271,
-        'isBundled': true,
-        'requiresPremium': false,
-        'sourceOrganization': 'SDA East Africa Division',
-        'licenseType': 'PUBLIC_DOMAIN',
-        'displayOrder': 2,
-      },
-    ];
+    final int enCollectionId = await db.customInsert('''
+      INSERT INTO collections (code, name, language_code, language_name_english, language_name_native,
+                               tier, total_songs, is_bundled, requires_premium, source_organization,
+                               license_type, display_order, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', variables: [
+      const Variable('en_sda_1985'),
+      const Variable('SDA Hymnal 1985'),
+      const Variable('en'),
+      const Variable('English'),
+      const Variable('English'),
+      const Variable(1),
+      const Variable(952),
+      const Variable(1),
+      const Variable(0),
+      const Variable('Seventh-day Adventist Church'),
+      const Variable('PUBLIC_DOMAIN'),
+      const Variable(1),
+      Variable(DateTime.now().millisecondsSinceEpoch ~/ 1000),
+      Variable(DateTime.now().millisecondsSinceEpoch ~/ 1000),
+    ]);
 
-    // Insert collections and build code -> id map
-    final Map<String, int> collectionCodeToId = {};
-    for (final collection in collections) {
-      final id = await db.into(db.collections).insert(
-        CollectionsCompanion.insert(
-          code: collection['code'] as String,
-          name: collection['name'] as String,
-          nameNative: const Value(null),
-          languageCode: collection['languageCode'] as String,
-          languageNameEnglish: collection['languageNameEnglish'] as String,
-          languageNameNative: collection['languageNameNative'] as String,
-          fontFamily: const Value('lora'),
-          specialCharacters: const Value(null),
-          tier: collection['tier'] as int,
-          totalSongs: collection['totalSongs'] as int,
-          isBundled: collection['isBundled'] as bool,
-          requiresPremium: collection['requiresPremium'] as bool,
-          downloadSizeMb: const Value(null),
-          isDownloaded: const Value(false),
-          sourceOrganization: Value(collection['sourceOrganization'] as String?),
-          licenseType: collection['licenseType'] as String,
-          licenseExpiry: const Value(null),
-          displayOrder: collection['displayOrder'] as int,
-          createdAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-          updatedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-        ),
-      );
-      collectionCodeToId[collection['code'] as String] = id;
-    }
+    final int swCollectionId = await db.customInsert('''
+      INSERT INTO collections (code, name, language_code, language_name_english, language_name_native,
+                               tier, total_songs, is_bundled, requires_premium, source_organization,
+                               license_type, display_order, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', variables: [
+      const Variable('sw_nyimbo_za_kristo'),
+      const Variable('Nyimbo za Kristo'),
+      const Variable('sw'),
+      const Variable('Swahili'),
+      const Variable('Kiswahili'),
+      const Variable(1),
+      const Variable(271),
+      const Variable(1),
+      const Variable(0),
+      const Variable('SDA East Africa Division'),
+      const Variable('PUBLIC_DOMAIN'),
+      const Variable(2),
+      Variable(DateTime.now().millisecondsSinceEpoch ~/ 1000),
+      Variable(DateTime.now().millisecondsSinceEpoch ~/ 1000),
+    ]);
 
-    final int enCollectionId = collectionCodeToId['en_sda_1985'] ?? 1;
-    final int swCollectionId = collectionCodeToId['sw_nyimbo_za_kristo'] ?? 2;
-
-    // Seed English hymns
     final Map<int, int> hymnNumberToId = {};
+
     final enJson = await rootBundle.loadString('assets/data/english_hymns.json');
     final enData = jsonDecode(enJson) as Map<String, dynamic>;
     final enHymns = enData['hymns'] as List<dynamic>;
@@ -101,26 +80,29 @@ class DataSeeder {
     for (final hymn in enHymns) {
       final map = hymn as Map<String, dynamic>;
       final hymnNumber = map['hymn_number'] as int;
-      final id = await db.into(db.hymns).insert(
-        HymnsCompanion.insert(
-          collectionId: enCollectionId,
-          hymnNumber: Value(hymnNumber),
-          title: map['title'] as String,
-          titleNormalized: (map['title'] as String).toLowerCase(),
-          firstLine: Value(map['first_line'] as String?),
-          firstLineNormalized: Value(map['first_line'] != null ? (map['first_line'] as String).toLowerCase() : null),
-          tuneName: Value(map['tune_name'] as String?),
-          meter: Value(map['meter'] as String?),
-          scriptureRefs: Value(map['scripture_ref'] as String?),
-          occasions: const Value('["GENERAL"]'),
-          tempoCategory: const Value('MEDIUM'),
-          difficulty: const Value('CONGREGATIONAL'),
-          voicing: const Value('SATB'),
-          copyrightStatus: const Value('PUBLIC_DOMAIN'),
-          createdAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-          updatedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-        ),
-      );
+      final id = await db.customInsert('''
+        INSERT INTO hymns (collection_id, hymn_number, title, title_normalized, first_line, first_line_normalized,
+                           tune_name, meter, scripture_refs, occasions, tempo_category, difficulty, voicing,
+                           copyright_status, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ''', variables: [
+        Variable(enCollectionId),
+        Variable(hymnNumber),
+        Variable(map['title'] as String),
+        Variable((map['title'] as String).toLowerCase()),
+        Variable(map['first_line'] as String?),
+        Variable(((map['first_line'] as String?) ?? '').toLowerCase()),
+        Variable(map['tune_name'] as String?),
+        Variable(map['meter'] as String?),
+        Variable(map['scripture_ref'] as String?),
+        const Variable('["GENERAL"]'),
+        const Variable('MEDIUM'),
+        const Variable('CONGREGATIONAL'),
+        const Variable('SATB'),
+        const Variable('PUBLIC_DOMAIN'),
+        Variable(DateTime.now().millisecondsSinceEpoch ~/ 1000),
+        Variable(DateTime.now().millisecondsSinceEpoch ~/ 1000),
+      ]);
       hymnNumberToId[hymnNumber] = id;
       inserted++;
       if (inserted % 100 == 0) {
@@ -129,7 +111,6 @@ class DataSeeder {
     }
     print('  Total English hymns inserted: $inserted');
 
-    // Seed Swahili hymns
     final swJson = await rootBundle.loadString('assets/data/swahili_hymns.json');
     final swData = jsonDecode(swJson) as Map<String, dynamic>;
     final swHymns = swData['hymns'] as List<dynamic>;
@@ -137,25 +118,27 @@ class DataSeeder {
     for (final hymn in swHymns) {
       final map = hymn as Map<String, dynamic>;
       final hymnNumber = map['hymn_number'] as int;
-      await db.into(db.hymns).insert(
-        HymnsCompanion.insert(
-          collectionId: swCollectionId,
-          hymnNumber: Value(hymnNumber),
-          title: map['title'] as String,
-          titleNormalized: (map['title'] as String).toLowerCase(),
-          firstLine: Value(map['first_line'] as String?),
-          firstLineNormalized: Value(map['first_line'] != null ? (map['first_line'] as String).toLowerCase() : null),
-          tuneName: Value(map['tune_name'] as String?),
-          scriptureRefs: const Value(null),
-          occasions: const Value('["GENERAL"]'),
-          tempoCategory: const Value('MEDIUM'),
-          difficulty: const Value('CONGREGATIONAL'),
-          voicing: const Value('SATB'),
-          copyrightStatus: const Value('PUBLIC_DOMAIN'),
-          createdAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-          updatedAt: DateTime.now().millisecondsSinceEpoch ~/ 1000,
-        ),
-      );
+      await db.customInsert('''
+        INSERT INTO hymns (collection_id, hymn_number, title, title_normalized, first_line, first_line_normalized,
+                           scripture_refs, occasions, tempo_category, difficulty, voicing, copyright_status,
+                           created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ''', variables: [
+        Variable(swCollectionId),
+        Variable(hymnNumber),
+        Variable(map['title'] as String),
+        Variable((map['title'] as String).toLowerCase()),
+        Variable(map['first_line'] as String?),
+        Variable(((map['first_line'] as String?) ?? '').toLowerCase()),
+        const Variable(null),
+        const Variable('["GENERAL"]'),
+        const Variable('MEDIUM'),
+        const Variable('CONGREGATIONAL'),
+        const Variable('SATB'),
+        const Variable('PUBLIC_DOMAIN'),
+        Variable(DateTime.now().millisecondsSinceEpoch ~/ 1000),
+        Variable(DateTime.now().millisecondsSinceEpoch ~/ 1000),
+      ]);
       hymnNumberToId[hymnNumber] = id;
       inserted++;
       if (inserted % 50 == 0) {
@@ -177,20 +160,19 @@ class DataSeeder {
       final map = verse as Map<String, dynamic>;
       final hymnNumber = map['hymn_number'] as int;
       final hymnId = hymnNumberToId[hymnNumber];
-      if (hymnId == null) {
-        continue;
-      }
+      if (hymnId == null) continue;
 
-      await db.into(db.hymnVerses).insert(
-        HymnVersesCompanion.insert(
-          hymnId: hymnId,
-          verseType: map['verse_type'] as String,
-          verseNumber: Value(map['verse_number'] as int?),
-          lyrics: map['lyrics'] as String,
-          lyricsNormalized: (map['lyrics_normalized'] as String?) ?? '',
-          displayOrder: (map['display_order'] as int?) ?? 0,
-        ),
-      );
+      await db.customInsert('''
+        INSERT INTO hymn_verses (hymn_id, verse_type, verse_number, lyrics, lyrics_normalized, display_order)
+        VALUES (?, ?, ?, ?, ?, ?)
+      ''', variables: [
+        Variable(hymnId),
+        Variable(map['verse_type'] as String),
+        Variable(map['verse_number'] as int?),
+        Variable(map['lyrics'] as String),
+        Variable((map['lyrics_normalized'] as String?) ?? ''),
+        Variable((map['display_order'] as int?) ?? 0),
+      ]);
 
       inserted++;
       if (inserted % 500 == 0) {

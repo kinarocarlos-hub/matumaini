@@ -8,40 +8,81 @@ class CollectionRepository {
   CollectionRepository(this.db);
 
   Future<List<Collection>> getAllCollections() async {
-    final collections = await (db.select(db.collections)
-      ..orderBy([(c) => OrderingTerm(expression: c.displayOrder)])
-    ).get();
-    return collections.map(_toModel).toList();
+    final results = await db.customSelect('''
+      SELECT id, code, name, name_native as nameNative, language_code as languageCode,
+             language_name_english as languageNameEnglish, language_name_native as languageNameNative,
+             font_family as fontFamily, special_characters as specialCharacters, tier,
+             total_songs as totalSongs, is_bundled as isBundled, requires_premium as requiresPremium,
+             download_size_mb as downloadSizeMb, is_downloaded as isDownloaded,
+             source_organization as sourceOrganization, license_type as licenseType,
+             license_expiry as licenseExpiry, display_order as displayOrder
+      FROM collections
+      ORDER BY display_order
+    ''').get();
+
+    return results.map((row) {
+      final data = row.data;
+      return Collection(
+        id: data['id'] as int,
+        code: data['code'] as String,
+        name: data['name'] as String,
+        nameNative: data['nameNative'] as String?,
+        languageCode: data['languageCode'] as String,
+        languageNameEnglish: data['languageNameEnglish'] as String,
+        languageNameNative: data['languageNameNative'] as String,
+        fontFamily: data['fontFamily'] as String? ?? 'lora',
+        specialCharacters: data['specialCharacters'] as String?,
+        tier: data['tier'] as int,
+        totalSongs: data['totalSongs'] as int? ?? 0,
+        isBundled: (data['isBundled'] as int? ?? 0) == 1,
+        requiresPremium: (data['requiresPremium'] as int? ?? 0) == 1,
+        downloadSizeMb: (data['downloadSizeMb'] as double?) ??
+            ((data['downloadSizeMb'] as int?)?.toDouble()),
+        isDownloaded: (data['isDownloaded'] as int? ?? 0) == 1,
+        sourceOrganization: data['sourceOrganization'] as String?,
+        licenseType: data['licenseType'] as String? ?? 'PENDING',
+        licenseExpiry: data['licenseExpiry'] as int?,
+        displayOrder: data['displayOrder'] as int? ?? 0,
+      );
+    }).toList();
   }
 
   Future<Collection?> getCollectionByCode(String code) async {
-    final collection = await (db.select(db.collections)
-      ..where((c) => c.code.equals(code))
-    ).getSingleOrNull();
-    return collection != null ? _toModel(collection) : null;
-  }
+    final result = await (db.customSelect('''
+      SELECT id, code, name, name_native as nameNative, language_code as languageCode,
+             language_name_english as languageNameEnglish, language_name_native as languageNameNative,
+             font_family as fontFamily, special_characters as specialCharacters, tier,
+             total_songs as totalSongs, is_bundled as isBundled, requires_premium as requiresPremium,
+             download_size_mb as downloadSizeMb, is_downloaded as isDownloaded,
+             source_organization as sourceOrganization, license_type as licenseType,
+             license_expiry as licenseExpiry, display_order as displayOrder
+      FROM collections
+      WHERE code = ?
+    ''', variables: [Variable(code)])).getSingleOrNull();
 
-  Collection _toModel(CollectionsData data) {
+    if (result == null) return null;
+    final data = result.data;
     return Collection(
-      id: data.id,
-      code: data.code,
-      name: data.name,
-      nameNative: data.nameNative,
-      languageCode: data.languageCode,
-      languageNameEnglish: data.languageNameEnglish,
-      languageNameNative: data.languageNameNative,
-      fontFamily: data.fontFamily,
-      specialCharacters: data.specialCharacters,
-      tier: data.tier,
-      totalSongs: data.totalSongs,
-      isBundled: data.isBundled,
-      requiresPremium: data.requiresPremium,
-      downloadSizeMb: data.downloadSizeMb,
-      isDownloaded: data.isDownloaded,
-      sourceOrganization: data.sourceOrganization,
-      licenseType: data.licenseType,
-      licenseExpiry: data.licenseExpiry,
-      displayOrder: data.displayOrder,
+      id: data['id'] as int,
+      code: data['code'] as String,
+      name: data['name'] as String,
+      nameNative: data['nameNative'] as String?,
+      languageCode: data['languageCode'] as String,
+      languageNameEnglish: data['languageNameEnglish'] as String,
+      languageNameNative: data['languageNameNative'] as String,
+      fontFamily: data['fontFamily'] as String? ?? 'lora',
+      specialCharacters: data['specialCharacters'] as String?,
+      tier: data['tier'] as int,
+      totalSongs: data['totalSongs'] as int? ?? 0,
+      isBundled: (data['isBundled'] as int? ?? 0) == 1,
+      requiresPremium: (data['requiresPremium'] as int? ?? 0) == 1,
+      downloadSizeMb: (data['downloadSizeMb'] as double?) ??
+          ((data['downloadSizeMb'] as int?)?.toDouble()),
+      isDownloaded: (data['isDownloaded'] as int? ?? 0) == 1,
+      sourceOrganization: data['sourceOrganization'] as String?,
+      licenseType: data['licenseType'] as String? ?? 'PENDING',
+      licenseExpiry: data['licenseExpiry'] as int?,
+      displayOrder: data['displayOrder'] as int? ?? 0,
     );
   }
 }
