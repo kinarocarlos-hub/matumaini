@@ -302,28 +302,28 @@ class AppDatabase {
       await db.customStatement('''
         CREATE TRIGGER IF NOT EXISTS hymns_ai AFTER INSERT ON hymns BEGIN
           INSERT INTO hymns_fts (rowid, hymn_id, title, first_line, all_verses_text, composer_name, lyricist_name, tune_name, scripture_refs_text, language_code)
-          VALUES (new.rowid, new.id, new.title, new.first_line, new.all_verses_text, '', '', new.tune_name, new.scripture_refs, '');
+          VALUES (new.rowid, new.id, new.title, new.first_line, '', '', '', new.tune_name, new.scripture_refs, '');
         END
       ''');
 
       await db.customStatement('''
         CREATE TRIGGER IF NOT EXISTS hymns_ad AFTER DELETE ON hymns BEGIN
           INSERT INTO hymns_fts (hymns_fts, rowid, hymn_id, title, first_line, all_verses_text, composer_name, lyricist_name, tune_name, scripture_refs_text, language_code)
-          VALUES ('delete', old.rowid, old.id, old.title, old.first_line, old.all_verses_text, old.composer_name, old.lyricist_name, old.tune_name, old.scripture_refs, '');
+          VALUES ('delete', old.rowid, old.id, old.title, old.first_line, '', '', '', old.tune_name, old.scripture_refs, '');
         END
       ''');
 
       await db.customStatement('''
         CREATE TRIGGER IF NOT EXISTS hymns_bu BEFORE UPDATE ON hymns BEGIN
           INSERT INTO hymns_fts (hymns_fts, rowid, hymn_id, title, first_line, all_verses_text, composer_name, lyricist_name, tune_name, scripture_refs_text, language_code)
-          VALUES ('delete', old.rowid, old.id, old.title, old.first_line, old.all_verses_text, old.composer_name, old.lyricist_name, old.tune_name, old.scripture_refs, '');
+          VALUES ('delete', old.rowid, old.id, old.title, old.first_line, '', '', '', old.tune_name, old.scripture_refs, '');
         END
       ''');
 
       await db.customStatement('''
         CREATE TRIGGER IF NOT EXISTS hymns_au AFTER UPDATE ON hymns BEGIN
           INSERT INTO hymns_fts (rowid, hymn_id, title, first_line, all_verses_text, composer_name, lyricist_name, tune_name, scripture_refs_text, language_code)
-          VALUES (new.rowid, new.id, new.title, new.first_line, new.all_verses_text, new.composer_name, new.lyricist_name, new.tune_name, new.scripture_refs, '');
+          VALUES (new.rowid, new.id, new.title, new.first_line, '', '', '', new.tune_name, new.scripture_refs, '');
         END
       ''');
 
@@ -343,36 +343,8 @@ class AppDatabase {
 
       await db.customStatement('''
         CREATE TRIGGER IF NOT EXISTS hymn_verses_bu BEFORE UPDATE ON hymn_verses BEGIN
-          INSERT INTO verses_fts (verse_id, hymn_id, lyrics, lyrics_normalized, verse_type, verse_number, language_code)
-          VALUES (new.id, new.hymn_id, new.lyrics, new.lyrics_normalized, new.verse_type, new.verse_number, '');
-        END
-      ''');
-
-      await db.customStatement('''
-        CREATE VIRTUAL TABLE IF NOT EXISTS vss_hymns USING vss0(embedding(384))
-      ''');
-
-      await db.customStatement('''
-        CREATE TRIGGER IF NOT EXISTS embeddings_ai AFTER INSERT ON song_embeddings BEGIN
-          INSERT INTO vss_hymns(rowid, embedding) VALUES (new.rowid, new.embedding);
-        END
-      ''');
-
-      await db.customStatement('''
-        CREATE TRIGGER IF NOT EXISTS embeddings_ad AFTER DELETE ON song_embeddings BEGIN
-          INSERT INTO vss_hymns(vss_hymns, rowid, embedding) VALUES ('delete', old.rowid, old.embedding);
-        END
-      ''');
-
-      await db.customStatement('''
-        CREATE TRIGGER IF NOT EXISTS embeddings_au AFTER UPDATE ON song_embeddings BEGIN
-          INSERT INTO vss_hymns(vss_hymns, rowid, embedding) VALUES ('delete', old.rowid, old.embedding);
-        END
-      ''');
-
-      await db.customStatement('''
-        CREATE TRIGGER IF NOT EXISTS embeddings_bu BEFORE UPDATE ON song_embeddings BEGIN
-          INSERT INTO vss_hymns(rowid, embedding) VALUES (new.rowid, new.embedding);
+          INSERT INTO verses_fts (verses_fts, rowid, verse_id, hymn_id, lyrics, lyrics_normalized, verse_type, verse_number, language_code)
+          VALUES ('delete', old.rowid, old.id, old.hymn_id, old.lyrics, old.lyrics_normalized, old.verse_type, old.verse_number, '');
         END
       ''');
     });

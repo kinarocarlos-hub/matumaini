@@ -9,13 +9,33 @@ import 'package:matumaini/screens/main_shell.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final db = AppDatabase();
-  await db.onCreate();
-  final seeder = DataSeeder(db);
-  await seeder.seedIfEmpty();
-  runApp(ProviderScope(overrides: [
-    databaseProvider.overrideWithValue(db),
-  ], child: const MatumainiApp()));
+  try {
+    final db = AppDatabase();
+    await db.onCreate();
+    final seeder = DataSeeder(db);
+    await seeder.seedIfEmpty();
+    runApp(ProviderScope(overrides: [
+      databaseProvider.overrideWithValue(db),
+    ], child: const MatumainiApp()));
+  } catch (e, stack) {
+    debugPrint('Fatal startup error: $e\n$stack');
+    runApp(MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        backgroundColor: const Color(0xFF0A0F1E),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Text(
+              'Startup error:\n$e',
+              style: const TextStyle(color: Colors.redAccent, fontSize: 14),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+      ),
+    ));
+  }
 }
 
 class MatumainiApp extends ConsumerWidget {
