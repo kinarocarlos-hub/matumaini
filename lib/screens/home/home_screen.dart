@@ -4,6 +4,7 @@ import 'package:matumaini/core/constants/colors.dart';
 import 'package:matumaini/core/constants/typography.dart';
 import 'package:matumaini/core/providers/app_providers.dart';
 import 'package:matumaini/models/hymn.dart';
+import 'package:matumaini/models/collection.dart';
 import 'package:matumaini/screens/search/search_screen.dart';
 import 'package:matumaini/screens/reader/reader_screen.dart';
 

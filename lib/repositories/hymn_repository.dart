@@ -1,6 +1,5 @@
-import 'dart:convert';
-import 'package:drift/dart.dart';
 import 'package:drift/drift.dart';
+import 'package:drift/drift.dart' hide Column;
 import 'package:matumaini/core/database/database.dart';
 import 'package:matumaini/models/hymn.dart';
 import 'package:matumaini/models/hymn_verse.dart';
@@ -24,7 +23,7 @@ class HymnRepository {
       ORDER BY collection_id, hymn_number
     ''');
 
-    return results.map((row) => _toModel(row.data)).toList();
+    return results.map((row) => _toModel(row)).toList();
   }
 
   Future<Hymn?> getHymnById(int id) async {
@@ -74,7 +73,7 @@ class HymnRepository {
       ORDER BY display_order
     ''', variables: [Variable(hymnId)]);
 
-    return results.map((row) => _verseToModel(row.data)).toList();
+    return results.map((row) => _verseToModel(row)).toList();
   }
 
   Future<List<Hymn>> searchHymns(String query) async {
@@ -95,7 +94,7 @@ class HymnRepository {
       LIMIT 50
     ''', variables: [Variable(query)]);
 
-    return results.map((row) => _toModel(row.data)).toList();
+    return results.map((row) => _toModel(row)).toList();
   }
 
   Future<void> incrementUseCount(int hymnId) async {

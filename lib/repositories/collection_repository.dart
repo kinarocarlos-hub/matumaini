@@ -1,5 +1,5 @@
-import 'package:drift/dart.dart';
 import 'package:drift/drift.dart';
+import 'package:drift/drift.dart' hide Column;
 import 'package:matumaini/core/database/database.dart';
 import 'package:matumaini/models/collection.dart';
 
@@ -21,7 +21,7 @@ class CollectionRepository {
       ORDER BY display_order
     ''');
 
-    return results.map((row) => _toModel(row.data)).toList();
+    return results.map((row) => _toModel(row)).toList();
   }
 
   Future<Collection?> getCollectionByCode(String code) async {

@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:matumaini/core/constants/colors.dart';
 import 'package:matumaini/core/constants/typography.dart';
 import 'package:matumaini/core/providers/app_providers.dart';
-import 'package:matumaini/core/database/database.dart';
+import 'package:matumaini/core/providers/database_providers.dart';
+import 'package:drift/drift.dart' hide Column;
 
 class ProgramDetailScreen extends ConsumerWidget {
   final int programId;
@@ -61,7 +62,7 @@ class ProgramDetailScreen extends ConsumerWidget {
           Icon(
             Icons.list,
             size: 64,
-            color: AppColors.gold.withOpacity(0.5),
+            color: AppColors.gold.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -80,7 +81,7 @@ class ProgramDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildItemsList(BuildContext context, List<ProgramItem> items) {
+  Widget _buildItemsList(BuildContext context, List<Map<String, dynamic>> items) {
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: items.length,
@@ -90,20 +91,20 @@ class ProgramDetailScreen extends ConsumerWidget {
         return ListTile(
           contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
           leading: CircleAvatar(
-            backgroundColor: AppColors.gold.withOpacity(0.2),
+            backgroundColor: AppColors.gold.withValues(alpha: 0.2),
             child: Text(
               '#${index + 1}',
               style: AppTypography.bodyMedium.copyWith(color: AppColors.gold),
             ),
           ),
           title: Text(
-            item.customTitle ?? item.itemType,
+            item['custom_title'] ?? item['item_type'] ?? 'Item',
             style: AppTypography.bodyLarge,
           ),
-          subtitle: item.durationMinutes != null
-              ? Text('${item.durationMinutes} min')
+          subtitle: item['duration_minutes'] != null
+              ? Text('${item['duration_minutes']} min')
               : null,
-          trailing: item.isComplete
+          trailing: item['is_complete'] == 1
               ? Icon(Icons.check_circle, color: AppColors.gold)
               : Icon(Icons.radio_button_unchecked, color: AppColors.textSecondary),
         );
@@ -193,25 +194,26 @@ class ProgramDetailScreen extends ConsumerWidget {
             onPressed: () async {
               if (titleController.text.isNotEmpty) {
                 final db = ref.read(databaseProvider);
-                final countResult = await db.customSelect('''
+                final countResult = await db.customSelectOne('''
                   SELECT COUNT(*) as count FROM program_items WHERE program_id = ?
-                ''', variables: [Variable(programId)]).getSingle();
-                final displayOrder = (countResult.data['count'] as int) + 1;
+                ''', variables: [Variable(programId)]);
+                final displayOrder = (countResult?['count'] as int? ?? 0) + 1;
 
-                await db.customInsert('''
-                  INSERT INTO program_items (program_id, display_order, item_type, custom_title, notes, hymn_id, custom_content, duration_minutes, is_complete)
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ''', variables: [
+                final variables = <Variable>[
                   Variable(programId),
                   Variable(displayOrder),
                   Variable(selectedType),
                   Variable(titleController.text),
                   Variable(notesController.text.isNotEmpty ? notesController.text : null),
-                  const Variable(null),
-                  const Variable(null),
-                  const Variable(null),
-                  const Variable(0),
-                ]);
+                  Variable(null),
+                  Variable(null),
+                  Variable(null),
+                  Variable(0),
+                ];
+                await db.customInsert('''
+                  INSERT INTO program_items (program_id, display_order, item_type, custom_title, notes, hymn_id, custom_content, duration_minutes, is_complete)
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', variables: variables);
                 if (dialogContext.mounted) Navigator.pop(dialogContext);
               }
             },

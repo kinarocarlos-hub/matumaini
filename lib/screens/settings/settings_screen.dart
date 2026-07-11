@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:matumaini/core/constants/colors.dart';
 import 'package:matumaini/core/constants/typography.dart';
-import 'package:matumaini/core/providers/database_providers.dart';
 import 'package:matumaini/screens/about/about_screen.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -22,70 +21,70 @@ class SettingsScreen extends ConsumerWidget {
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
-        children: const [
+        children: [
           _SettingsSection(
             title: 'Appearance',
             children: [
-              _SettingsItem(
+              const _SettingsItem(
                 title: 'Theme',
                 subtitle: 'Deep Space (Dark)',
                 icon: Icons.palette_outlined,
               ),
-              _SettingsItem(
+              const _SettingsItem(
                 title: 'Font Size',
                 subtitle: '18px (Default)',
                 icon: Icons.text_fields_outlined,
               ),
-              _SettingsItem(
+              const _SettingsItem(
                 title: 'Line Spacing',
                 subtitle: 'Normal',
                 icon: Icons.format_line_spacing,
               ),
-              _SettingsItem(
+              const _SettingsItem(
                 title: 'Reader Mode',
                 subtitle: 'Reading',
                 icon: Icons.menu_book_outlined,
               ),
             ],
           ),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
           _SettingsSection(
             title: 'Playback',
             children: [
-              _SettingsItem(
+              const _SettingsItem(
                 title: 'MIDI Instrument',
                 subtitle: 'Organ',
                 icon: Icons.piano_outlined,
               ),
-              _SettingsItem(
+              const _SettingsItem(
                 title: 'Auto-scroll',
                 subtitle: 'Off',
                 icon: Icons.swipe,
               ),
-              _SettingsItem(
+              const _SettingsItem(
                 title: 'Background Playback',
                 subtitle: 'On',
                 icon: Icons.play_circle_outline,
               ),
             ],
           ),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
           _SettingsSection(
             title: 'Search',
             children: [
-              _SettingsItem(
+              const _SettingsItem(
                 title: 'Default Search Mode',
                 subtitle: 'Text',
                 icon: Icons.search,
               ),
-              _SettingsItem(
+              const _SettingsItem(
                 title: 'Language Filter',
                 subtitle: 'All Languages',
                 icon: Icons.language,
               ),
             ],
           ),
-          SizedBox(height: 24),
+          const SizedBox(height: 24),
           _SettingsSection(
             title: 'About',
             children: [
@@ -94,7 +93,12 @@ class SettingsScreen extends ConsumerWidget {
                 subtitle: 'Version 0.1.0-dev',
                 icon: Icons.info_outline,
                 isNavigable: true,
-                route: AboutScreen,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const AboutScreen()),
+                  );
+                },
               ),
             ],
           ),
@@ -133,7 +137,7 @@ class _SettingsSection extends StatelessWidget {
           decoration: BoxDecoration(
             color: AppColors.surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.gold.withOpacity(0.2)),
+            border: Border.all(color: AppColors.gold.withValues(alpha: 0.2)),
           ),
           child: Column(children: children),
         ),
@@ -147,14 +151,14 @@ class _SettingsItem extends StatelessWidget {
   final String subtitle;
   final IconData icon;
   final bool isNavigable;
-  final Widget? route;
+  final VoidCallback? onTap;
 
   const _SettingsItem({
     required this.title,
     required this.subtitle,
     required this.icon,
     this.isNavigable = false,
-    this.route,
+    this.onTap,
   });
 
   @override
@@ -166,22 +170,16 @@ class _SettingsItem extends StatelessWidget {
       trailing: isNavigable
           ? Icon(Icons.chevron_right, color: AppColors.textSecondary, size: 20)
           : null,
-      onTap: isNavigable && route != null
-          ? () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => route!),
-              );
-            }
-          : () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('$title settings coming in next release'),
-                  backgroundColor: AppColors.gold,
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
-            },
+      onTap: onTap ??
+          () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('$title settings coming in next release'),
+                backgroundColor: AppColors.gold,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          },
     );
   }
 }

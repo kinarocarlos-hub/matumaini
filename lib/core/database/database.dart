@@ -1,23 +1,17 @@
 import 'dart:io';
 
-import 'package:drift/dart.dart';
+import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 
 class AppDatabase {
-  late final LazyDatabase _lazy;
-  late final DatabaseConnection _connection;
-
-  AppDatabase() {
-    _lazy = LazyDatabase(() async {
-      return NativeDatabase(_openConnection());
-    });
-  }
+  dynamic _db;
 
   Future<void> onCreate() async {
-    _connection = await _lazy.open();
-    final db = _connection.executor;
+    final file = await _openConnection();
+    _db = NativeDatabase(file);
+    final db = _db;
 
     await db.runInTransaction(() async {
       await db.customStatement('''
@@ -384,35 +378,35 @@ class AppDatabase {
     });
   }
 
-  QueryExecutor get executor => _connection.executor;
+
 
   Future<List<Map<String, dynamic>>> customSelect(String sql, {List<Variable>? variables}) async {
-    return _connection.executor.customSelect(sql, variables: variables);
+    final results = await _db.customSelect(sql, variables: variables);
+    return results.map((r) => r.data).toList();
   }
 
   Future<Map<String, dynamic>?> customSelectOne(String sql, {List<Variable>? variables}) async {
-    final results = await _connection.executor.customSelect(sql, variables: variables);
-    return results.isNotEmpty ? results.first.data : null;
+    final results = await _db.customSelect(sql, variables: variables);
+    if (results.isEmpty) return null;
+    return results.first.data;
   }
 
   Future<void> customExecute(String sql, {List<Variable>? variables}) async {
-    return _connection.executor.execute(sql, variables: variables);
+    await _db.execute(sql, variables: variables);
   }
 
   Future<int> customInsert(String sql, {List<Variable>? variables}) async {
-    await _connection.executor.execute(sql, variables: variables);
-    final idResult = await _connection.executor.customSelect('SELECT last_insert_rowid() as id');
+    await _db.execute(sql, variables: variables);
+    final idResult = await _db.customSelect('SELECT last_insert_rowid() as id');
     return idResult.first.data['id'] as int;
   }
 
   Future<void> customUpdate(String sql, {List<Variable>? variables}) async {
-    await _connection.executor.execute(sql, variables: variables);
+    await _db.execute(sql, variables: variables);
   }
 
-  File _openConnection() {
-    return File(p.join(
-      getApplicationDocumentsDirectory().path,
-      'matumaini.sqlite',
-    ));
+  Future<File> _openConnection() async {
+    final directory = await getApplicationDocumentsDirectory();
+    return File(p.join(directory.path, 'matumaini.sqlite'));
   }
 }

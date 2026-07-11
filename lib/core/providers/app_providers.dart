@@ -1,10 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:matumaini/core/database/database.dart';
 import 'package:matumaini/core/providers/database_providers.dart';
 import 'package:matumaini/repositories/hymn_repository.dart';
 import 'package:matumaini/repositories/collection_repository.dart';
 import 'package:matumaini/models/hymn.dart';
 import 'package:matumaini/models/collection.dart';
+import 'package:matumaini/models/hymn_verse.dart';
+import 'package:drift/drift.dart';
 
 final hymnRepositoryProvider = Provider<HymnRepository>((ref) {
   final db = ref.watch(databaseProvider);
@@ -32,7 +33,7 @@ final hymnSearchProvider = FutureProvider.family<List<Hymn>, String>((ref, query
   return repo.searchHymns(query);
 });
 
-final hymnDetailProvider = FutureProvider.family<Hymn, int>((ref, hymnId) async {
+final hymnDetailProvider = FutureProvider.family<Hymn?, int>((ref, hymnId) async {
   final repo = ref.watch(hymnRepositoryProvider);
   return repo.getHymnById(hymnId);
 });
@@ -49,8 +50,8 @@ final programsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async 
            created_at as createdAt, is_template as isTemplate
     FROM worship_programs
     ORDER BY date DESC
-  ''').get();
-  return results.map((r) => r.data).toList();
+  ''');
+  return results;
 });
 
 final programItemsProvider = FutureProvider.family<List<Map<String, dynamic>>, int>((ref, programId) async {
@@ -62,6 +63,6 @@ final programItemsProvider = FutureProvider.family<List<Map<String, dynamic>>, i
     FROM program_items
     WHERE program_id = ?
     ORDER BY display_order
-  ''', variables: [Variable(programId)]).get();
-  return results.map((r) => r.data).toList();
+  ''', variables: [Variable(programId)]);
+  return results;
 });

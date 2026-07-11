@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:matumaini/core/constants/colors.dart';
 import 'package:matumaini/core/constants/typography.dart';
 import 'package:matumaini/core/providers/app_providers.dart';
+import 'package:matumaini/core/providers/database_providers.dart';
+import 'package:drift/drift.dart' hide Column;
+import 'package:matumaini/screens/programs/program_detail_screen.dart';
 
 class ProgramsScreen extends ConsumerWidget {
   const ProgramsScreen({super.key});
@@ -55,7 +58,7 @@ class ProgramsScreen extends ConsumerWidget {
           Icon(
             Icons.event,
             size: 64,
-            color: AppColors.gold.withOpacity(0.5),
+            color: AppColors.gold.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -74,7 +77,7 @@ class ProgramsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildProgramsList(BuildContext context, WidgetRef ref, List<WorshipProgram> programs) {
+  Widget _buildProgramsList(BuildContext context, WidgetRef ref, List<Map<String, dynamic>> programs) {
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: programs.length,
@@ -84,20 +87,20 @@ class ProgramsScreen extends ConsumerWidget {
         return ListTile(
           contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
           title: Text(
-            program.title,
+            program['title'] ?? 'Untitled Program',
             style: AppTypography.bodyLarge,
           ),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (program.date != null)
+              if (program['date'] != null)
                 Text(
-                  'Date: ${DateTime.fromMillisecondsSinceEpoch(program.date * 1000).toString().split(' ')[0]}',
+                  'Date: ${DateTime.fromMillisecondsSinceEpoch((program['date'] as int) * 1000).toString().split(' ')[0]}',
                   style: AppTypography.bodyMedium,
                 ),
-              if (program.churchName != null && program.churchName!.isNotEmpty)
+              if (program['churchName'] != null && (program['churchName'] as String).isNotEmpty)
                 Text(
-                  program.churchName!,
+                  program['churchName'] as String,
                   style: AppTypography.bodyMedium,
                 ),
             ],
@@ -110,7 +113,7 @@ class ProgramsScreen extends ConsumerWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => ProgramDetailScreen(programId: program.id),
+                builder: (context) => ProgramDetailScreen(programId: program['id'] as int),
               ),
             );
           },
@@ -193,19 +196,20 @@ class ProgramsScreen extends ConsumerWidget {
             onPressed: () async {
               if (titleController.text.isNotEmpty) {
                 final db = ref.read(databaseProvider);
-                await db.customInsert('''
-                  INSERT INTO worship_programs (title, church_name, notes, created_at, updated_at, date, service_type, is_template)
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                ''', variables: [
+                final variables = <Variable>[
                   Variable(titleController.text),
                   Variable(churchController.text.isNotEmpty ? churchController.text : null),
                   Variable(notesController.text.isNotEmpty ? notesController.text : null),
                   Variable(DateTime.now().millisecondsSinceEpoch ~/ 1000),
                   Variable(DateTime.now().millisecondsSinceEpoch ~/ 1000),
-                  const Variable(null),
-                  const Variable(null),
-                  const Variable(0),
-                ]);
+                  Variable(null),
+                  Variable(null),
+                  Variable(0),
+                ];
+                await db.customInsert('''
+                  INSERT INTO worship_programs (title, church_name, notes, created_at, updated_at, date, service_type, is_template)
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                ''', variables: variables);
                 if (dialogContext.mounted) Navigator.pop(dialogContext);
               }
             },

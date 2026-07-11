@@ -1,4 +1,4 @@
-import 'package:drift/dart.dart';
+import 'package:drift/drift.dart';
 
 class Collections extends Table {
   IntColumn get id => integer().autoIncrement()();

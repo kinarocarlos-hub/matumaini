@@ -4,6 +4,7 @@ import 'package:matumaini/core/constants/colors.dart';
 import 'package:matumaini/core/constants/typography.dart';
 import 'package:matumaini/core/database/database.dart';
 import 'package:matumaini/core/database/data_seeder.dart';
+import 'package:matumaini/core/providers/database_providers.dart';
 import 'package:matumaini/screens/main_shell.dart';
 
 void main() async {
