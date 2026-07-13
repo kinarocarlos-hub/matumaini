@@ -13,7 +13,7 @@ class AppDatabase {
     _db = NativeDatabase(file);
     final db = _db;
 
-    await db.runInTransaction(() async {
+    await db.transaction(() async {
       await db.customStatement('''
         CREATE TABLE IF NOT EXISTS collections (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
