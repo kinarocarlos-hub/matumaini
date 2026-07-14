@@ -38,19 +38,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Navbar background on scroll
     const navbar = document.querySelector('.navbar');
+    let lastScroll = 0;
+    
     window.addEventListener('scroll', () => {
         const currentScroll = window.pageYOffset;
+        
         if (currentScroll > 50) {
-            navbar.style.background = 'rgba(10, 15, 30, 0.95)';
+            navbar.classList.add('scrolled');
         } else {
-            navbar.style.background = 'rgba(10, 15, 30, 0.85)';
+            navbar.classList.remove('scrolled');
         }
+        
+        lastScroll = currentScroll;
     });
 
     // Intersection Observer for fade-in animations
     const observerOptions = {
         threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
+        rootMargin: '0px 0px -60px 0px'
     };
 
     const observer = new IntersectionObserver((entries) => {
@@ -62,23 +67,25 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }, observerOptions);
 
-    document.querySelectorAll('.feature-card, .carloseae-feature, .download-card, .value').forEach(el => {
+    // Observe all cards and sections
+    const animatedElements = document.querySelectorAll('.feature-card, .carloseae-feature, .download-card, .value');
+    animatedElements.forEach(el => {
         el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        el.style.transform = 'translateY(30px)';
+        el.style.transition = 'opacity 0.7s cubic-bezier(0.4, 0, 0.2, 1), transform 0.7s cubic-bezier(0.4, 0, 0.2, 1)';
         observer.observe(el);
     });
 
-    // Initial animations
+    // Trigger initial animations for elements in view
     setTimeout(() => {
-        document.querySelectorAll('.feature-card, .carloseae-feature, .download-card, .value').forEach(el => {
+        animatedElements.forEach(el => {
             const rect = el.getBoundingClientRect();
             if (rect.top < window.innerHeight) {
                 el.style.opacity = '1';
                 el.style.transform = 'translateY(0)';
             }
         });
-    }, 100);
+    }, 150);
 
     // Animated counters
     const counters = document.querySelectorAll('.stat-number');
@@ -99,14 +106,14 @@ document.addEventListener('DOMContentLoaded', () => {
     counters.forEach(counter => counterObserver.observe(counter));
 
     function animateCounter(el, target, suffix) {
-        const duration = 1500;
+        const duration = 1800;
         const start = performance.now();
         const startValue = 0;
 
         function update(now) {
             const elapsed = now - start;
             const progress = Math.min(elapsed / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3);
+            const eased = 1 - Math.pow(1 - progress, 4);
             const current = Math.floor(startValue + (target - startValue) * eased);
             el.textContent = current + suffix.replace(/[0-9]/g, '').trim();
             if (progress < 1) {
@@ -150,43 +157,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!messageEl) {
             messageEl = document.createElement('div');
             messageEl.id = 'form-message';
-            messageEl.style.cssText = 'padding:12px 16px;border-radius:8px;margin-top:12px;font-size:14px;';
+            messageEl.style.cssText = 'padding:14px 18px;border-radius:12px;margin-top:16px;font-size:14px;font-weight:500;';
             contactForm.parentNode.insertBefore(messageEl, contactForm.nextSibling);
         }
         messageEl.textContent = text;
         messageEl.style.background = type === 'success' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)';
         messageEl.style.color = type === 'success' ? '#6ee7b7' : '#fca5a5';
-        messageEl.style.border = `1px solid ${type === 'success' ? 'rgba(16, 185, 129, 0.35)' : 'rgba(239, 68, 68, 0.35)'}`;
-    }
-
-    // Dynamic download card data
-    const downloadData = [
-        {
-            icon: '📱',
-            title: 'Download APK',
-            description: 'Get the latest release for Android',
-            href: 'https://github.com/kinarocarlos-hub/matumaini/releases/latest'
-        },
-        {
-            icon: '⭐',
-            title: 'Star on GitHub',
-            description: 'Follow development and contribute',
-            href: 'https://github.com/kinarocarlos-hub/matumaini'
-        }
-    ];
-
-    const downloadContainer = document.getElementById('download-cards');
-    if (downloadContainer) {
-        downloadContainer.innerHTML = downloadData.map(item => `
-            <a href="${item.href}" target="_blank" rel="noopener" class="download-card">
-                <div class="download-icon">${item.icon}</div>
-                <div class="download-info">
-                    <h3>${item.title}</h3>
-                    <p>${item.description}</p>
-                </div>
-                <div class="download-arrow">→</div>
-            </a>
-        `).join('');
+        messageEl.style.border = `1.5px solid ${type === 'success' ? 'rgba(16, 185, 129, 0.35)' : 'rgba(239, 68, 68, 0.35)'}`;
+        
+        setTimeout(() => {
+            messageEl.style.opacity = '0';
+            messageEl.style.transition = 'opacity 0.3s ease';
+        }, 4000);
     }
 
     // Active nav link highlight
@@ -197,7 +179,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let current = '';
         sections.forEach(section => {
             const sectionTop = section.offsetTop;
-            if (pageYOffset >= sectionTop - 120) {
+            if (pageYOffset >= sectionTop - 150) {
                 current = section.getAttribute('id');
             }
         });
@@ -209,4 +191,16 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    // Parallax effect for hero
+    const hero = document.querySelector('.hero');
+    if (hero) {
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const heroVisual = document.querySelector('.hero-visual');
+            if (heroVisual && scrolled < 800) {
+                heroVisual.style.transform = `translateY(${scrolled * 0.15}px)`;
+            }
+        });
+    }
 });

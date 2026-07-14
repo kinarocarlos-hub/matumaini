@@ -8,31 +8,33 @@
     <link rel="stylesheet" href="assets/styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <div class="nav-brand">
+            <a href="#" class="nav-brand">
                 <span class="brand-icon">🎵</span>
                 <span class="brand-text">Matumaini</span>
-            </div>
+            </a>
             <ul class="nav-links">
                 <li><a href="#features">Features</a></li>
                 <li><a href="#carloseae">Carloseae</a></li>
                 <li><a href="#download">Download</a></li>
+                <li><a href="#contact">Contact</a></li>
                 <li><a href="#about">About</a></li>
             </ul>
             <button class="mobile-menu-toggle" aria-label="Toggle menu" aria-expanded="false">
-        <span class="hamburger"></span>
-    </button>
-    <a href="#download" class="nav-cta">Get the App</a>
+                <span class="hamburger"></span>
+            </button>
+            <a href="#download" class="nav-cta">Get the App</a>
         </div>
     </nav>
 
     <header class="hero">
         <div class="hero-container">
             <div class="hero-content">
+                <div class="hero-badge">Now with AI Study Companion</div>
                 <h1 class="hero-title">
                     Your Faith,<br>
                     <span class="hero-accent">Deepened</span>
@@ -93,8 +95,11 @@
 
     <section id="features" class="features">
         <div class="container">
-            <h2 class="section-title">Everything You Need for Spiritual Growth</h2>
-            <p class="section-subtitle">Powerful features designed for worship, study, and community.</p>
+            <div class="section-header">
+                <span class="section-label">Features</span>
+                <h2 class="section-title">Everything You Need for Spiritual Growth</h2>
+                <p class="section-subtitle">Powerful features designed for worship, study, and community.</p>
+            </div>
             
             <div class="features-grid">
                 <div class="feature-card">
@@ -140,8 +145,11 @@
         <div class="container">
             <div class="carloseae-content">
                 <div class="carloseae-text">
-                    <h2 class="section-title">Meet <span class="hero-accent">Carloseae</span></h2>
-                    <p class="section-subtitle">Your personal AI study companion, built into Matumaini.</p>
+                    <div class="section-header" style="text-align: left; margin-bottom: 32px;">
+                        <span class="section-label">AI Study Companion</span>
+                        <h2 class="section-title">Meet <span class="hero-accent">Carloseae</span></h2>
+                        <p class="section-subtitle" style="margin: 0;">Your personal AI study companion, built into Matumaini.</p>
+                    </div>
                     
                     <div class="carloseae-features">
                         <div class="carloseae-feature">
@@ -179,7 +187,7 @@
                         <div class="chat-header">
                             <span class="chat-avatar">🤖</span>
                             <span class="chat-name">Carloseae</span>
-                            <span class="chat-status">● Online</span>
+                            <span class="chat-status">Online</span>
                         </div>
                         <div class="chat-messages">
                             <div class="chat-bubble user">
@@ -199,8 +207,11 @@
 
     <section id="download" class="download">
         <div class="container">
-            <h2 class="section-title">Download Matumaini</h2>
-            <p class="section-subtitle">Available for Android devices. iOS coming soon.</p>
+            <div class="section-header">
+                <span class="section-label">Download</span>
+                <h2 class="section-title">Download Matumaini</h2>
+                <p class="section-subtitle">Available for Android devices. iOS coming soon.</p>
+            </div>
             
             <div id="download-cards" class="download-options">
                 <a href="https://github.com/kinarocarlos-hub/matumaini/releases/latest" target="_blank" rel="noopener" class="download-card">
@@ -231,8 +242,11 @@
 
     <section id="contact" class="contact">
         <div class="container">
-            <h2 class="section-title">Get in Touch</h2>
-            <p class="section-subtitle">Have feedback, questions, or want to contribute?</p>
+            <div class="section-header">
+                <span class="section-label">Contact</span>
+                <h2 class="section-title">Get in Touch</h2>
+                <p class="section-subtitle">Have feedback, questions, or want to contribute?</p>
+            </div>
             <form id="contact-form" class="contact-form" novalidate>
                 <div class="form-row">
                     <div class="form-group">
@@ -255,7 +269,10 @@
 
     <section id="about" class="about">
         <div class="container">
-            <h2 class="section-title">About Matumaini</h2>
+            <div class="section-header">
+                <span class="section-label">About</span>
+                <h2 class="section-title">About Matumaini</h2>
+            </div>
             <div class="about-content">
                 <p>
                     <strong>Matumaini</strong> is a modern, open-source hymnal and Bible study app built specifically for Seventh-day Adventists. 
