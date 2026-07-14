@@ -5,18 +5,20 @@ import '../models/carloseae_api_service.dart';
 
 class CarloseaeChatNotifier extends StateNotifier<List<ChatMessage>> {
   final CarloseaeApiService _apiService;
+  String? _conversationId;
 
   CarloseaeChatNotifier(this._apiService) : super([]);
 
   Future<void> sendMessage(String message) async {
     final currentHistory = List<ChatMessage>.from(state);
-    final conversationId = currentHistory.isEmpty
-        ? DateTime.now().millisecondsSinceEpoch.toString()
-        : currentHistory.first.id;
+
+    if (_conversationId == null) {
+      _conversationId = DateTime.now().millisecondsSinceEpoch.toString();
+    }
 
     final response = await _apiService.sendMessage(
       message: message,
-      conversationId: conversationId,
+      conversationId: _conversationId!,
       history: currentHistory,
     );
 
@@ -41,6 +43,7 @@ class CarloseaeChatNotifier extends StateNotifier<List<ChatMessage>> {
 
   void clear() {
     state = [];
+    _conversationId = null;
   }
 }
 
