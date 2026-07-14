@@ -156,7 +156,9 @@ class HomeScreen extends ConsumerWidget {
       separatorBuilder: (context, index) => const Divider(),
       itemBuilder: (context, index) {
         final hymn = recent[index];
-        return ListTile(
+        return Material(
+          color: Colors.transparent,
+          child: ListTile(
           title: Text(
             hymn.title,
             style: AppTypography.bodyLarge,
@@ -181,7 +183,8 @@ class HomeScreen extends ConsumerWidget {
               ),
             );
           },
-        );
+        ),
+      );
       },
     );
   }
