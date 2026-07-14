@@ -159,32 +159,32 @@ class HomeScreen extends ConsumerWidget {
         return Material(
           color: Colors.transparent,
           child: ListTile(
-          title: Text(
-            hymn.title,
-            style: AppTypography.bodyLarge,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+            title: Text(
+              hymn.title,
+              style: AppTypography.bodyLarge,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            subtitle: Text(
+              hymn.firstLine ?? '',
+              style: AppTypography.bodyMedium,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            trailing: Text(
+              '#${hymn.hymnNumber ?? ''}',
+              style: AppTypography.bodyMedium.copyWith(color: AppColors.gold),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ReaderScreen(hymnId: hymn.id),
+                ),
+              );
+            },
           ),
-          subtitle: Text(
-            hymn.firstLine ?? '',
-            style: AppTypography.bodyMedium,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          trailing: Text(
-            '#${hymn.hymnNumber ?? ''}',
-            style: AppTypography.bodyMedium.copyWith(color: AppColors.gold),
-          ),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ReaderScreen(hymnId: hymn.id),
-              ),
-            );
-          },
-        ),
-      );
+        );
       },
     );
   }

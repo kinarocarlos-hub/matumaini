@@ -87,40 +87,40 @@ class ProgramsScreen extends ConsumerWidget {
         return Material(
           color: Colors.transparent,
           child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-          title: Text(
-            program['title'] ?? 'Untitled Program',
-            style: AppTypography.bodyLarge,
-          ),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (program['date'] != null)
-                Text(
-                  'Date: ${DateTime.fromMillisecondsSinceEpoch((program['date'] as int) * 1000).toString().split(' ')[0]}',
-                  style: AppTypography.bodyMedium,
+            contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+            title: Text(
+              program['title'] ?? 'Untitled Program',
+              style: AppTypography.bodyLarge,
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (program['date'] != null)
+                  Text(
+                    'Date: ${DateTime.fromMillisecondsSinceEpoch((program['date'] as int) * 1000).toString().split(' ')[0]}',
+                    style: AppTypography.bodyMedium,
+                  ),
+                if (program['churchName'] != null && (program['churchName'] as String).isNotEmpty)
+                  Text(
+                    program['churchName'] as String,
+                    style: AppTypography.bodyMedium,
+                  ),
+              ],
+            ),
+            trailing: Icon(
+              Icons.chevron_right,
+              color: AppColors.gold,
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProgramDetailScreen(programId: program['id'] as int),
                 ),
-              if (program['churchName'] != null && (program['churchName'] as String).isNotEmpty)
-                Text(
-                  program['churchName'] as String,
-                  style: AppTypography.bodyMedium,
-                ),
-            ],
+              );
+            },
           ),
-          trailing: Icon(
-            Icons.chevron_right,
-            color: AppColors.gold,
-          ),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ProgramDetailScreen(programId: program['id'] as int),
-              ),
-            );
-          },
-        ),
-      );
+        );
       },
     );
   }

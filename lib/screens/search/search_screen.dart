@@ -144,43 +144,43 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         return Material(
           color: Colors.transparent,
           child: ListTile(
-          title: Text(
-            hymn.title,
-            style: AppTypography.bodyLarge,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              if (hymn.firstLine != null && hymn.firstLine!.isNotEmpty)
-                Text(
-                  hymn.firstLine!,
-                  style: AppTypography.bodyMedium,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+            title: Text(
+              hymn.title,
+              style: AppTypography.bodyLarge,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (hymn.firstLine != null && hymn.firstLine!.isNotEmpty)
+                  Text(
+                    hymn.firstLine!,
+                    style: AppTypography.bodyMedium,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                if (hymn.tuneName != null && hymn.tuneName!.isNotEmpty)
+                  Text(
+                    'Tune: ${hymn.tuneName}',
+                    style: AppTypography.bodySmall,
+                  ),
+              ],
+            ),
+            trailing: Text(
+              '#${hymn.hymnNumber ?? ''}',
+              style: AppTypography.bodyMedium.copyWith(color: AppColors.gold),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ReaderScreen(hymnId: hymn.id),
                 ),
-              if (hymn.tuneName != null && hymn.tuneName!.isNotEmpty)
-                Text(
-                  'Tune: ${hymn.tuneName}',
-                  style: AppTypography.bodySmall,
-                ),
-            ],
+              );
+            },
           ),
-          trailing: Text(
-            '#${hymn.hymnNumber ?? ''}',
-            style: AppTypography.bodyMedium.copyWith(color: AppColors.gold),
-          ),
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => ReaderScreen(hymnId: hymn.id),
-              ),
-            );
-          },
-        ),
-      );
+        );
       },
     );
   }

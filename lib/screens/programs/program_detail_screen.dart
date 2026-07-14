@@ -91,26 +91,26 @@ class ProgramDetailScreen extends ConsumerWidget {
         return Material(
           color: Colors.transparent,
           child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-          leading: CircleAvatar(
-            backgroundColor: AppColors.gold.withValues(alpha: 0.2),
-            child: Text(
-              '#${index + 1}',
-              style: AppTypography.bodyMedium.copyWith(color: AppColors.gold),
+            contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+            leading: CircleAvatar(
+              backgroundColor: AppColors.gold.withValues(alpha: 0.2),
+              child: Text(
+                '#${index + 1}',
+                style: AppTypography.bodyMedium.copyWith(color: AppColors.gold),
+              ),
             ),
+            title: Text(
+              item['custom_title'] ?? item['item_type'] ?? 'Item',
+              style: AppTypography.bodyLarge,
+            ),
+            subtitle: item['duration_minutes'] != null
+                ? Text('${item['duration_minutes']} min')
+                : null,
+            trailing: item['is_complete'] == 1
+                ? Icon(Icons.check_circle, color: AppColors.gold)
+                : Icon(Icons.radio_button_unchecked, color: AppColors.textSecondary),
           ),
-          title: Text(
-            item['custom_title'] ?? item['item_type'] ?? 'Item',
-            style: AppTypography.bodyLarge,
-          ),
-          subtitle: item['duration_minutes'] != null
-              ? Text('${item['duration_minutes']} min')
-              : null,
-          trailing: item['is_complete'] == 1
-              ? Icon(Icons.check_circle, color: AppColors.gold)
-              : Icon(Icons.radio_button_unchecked, color: AppColors.textSecondary),
-        ),
-      );
+        );
       },
     );
   }
@@ -133,7 +133,7 @@ class ProgramDetailScreen extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               DropdownButtonFormField<String>(
-                value: selectedType,
+                initialValue: selectedType,
                 decoration: const InputDecoration(
                   labelText: 'Type',
                   labelStyle: TextStyle(color: AppColors.textSecondary),

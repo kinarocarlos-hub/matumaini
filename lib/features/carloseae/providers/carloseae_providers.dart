@@ -2,12 +2,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import '../models/chat_message.dart';
 import '../models/carloseae_api_service.dart';
+import '../repositories/carloseae_repository.dart';
+import '../../../core/database/database.dart';
 
 class CarloseaeChatNotifier extends StateNotifier<List<ChatMessage>> {
   final CarloseaeApiService _apiService;
+  final CarloseaeRepository _repository;
   String? _conversationId;
 
-  CarloseaeChatNotifier(this._apiService) : super([]);
+  CarloseaeChatNotifier(this._apiService, this._repository) : super([]);
 
   Future<void> sendMessage(String message) async {
     final currentHistory = List<ChatMessage>.from(state);
@@ -39,6 +42,13 @@ class CarloseaeChatNotifier extends StateNotifier<List<ChatMessage>> {
     );
 
     state = [userMessage, assistantMessage, ...currentHistory];
+
+    try {
+      await _repository.saveMessage(userMessage);
+      await _repository.saveMessage(assistantMessage);
+    } catch (_) {
+      // Non-critical: local history is best-effort
+    }
   }
 
   void clear() {
@@ -48,5 +58,7 @@ class CarloseaeChatNotifier extends StateNotifier<List<ChatMessage>> {
 }
 
 final carloseaeChatProvider = StateNotifierProvider<CarloseaeChatNotifier, List<ChatMessage>>((ref) {
-  return CarloseaeChatNotifier(CarloseaeApiService(http.Client()));
+  final db = AppDatabase();
+  final repository = CarloseaeRepository(db);
+  return CarloseaeChatNotifier(CarloseaeApiService(http.Client()), repository);
 });

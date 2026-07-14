@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import '../models/chat_message.dart';
 import '../providers/carloseae_providers.dart';
 
@@ -14,6 +16,15 @@ class _CarloseaeChatScreenState extends ConsumerState<CarloseaeChatScreen> {
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool _isLoading = false;
+  String? _errorMessage;
+  bool _isOffline = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkConnectivity();
+    Connectivity().onConnectivityChanged.listen((_) => _checkConnectivity());
+  }
 
   @override
   void dispose() {
@@ -22,22 +33,52 @@ class _CarloseaeChatScreenState extends ConsumerState<CarloseaeChatScreen> {
     super.dispose();
   }
 
+  Future<void> _checkConnectivity() async {
+    final result = await Connectivity().checkConnectivity();
+    if (mounted) {
+      setState(() {
+        _isOffline = result == ConnectivityResult.none;
+        if (!_isOffline && _errorMessage != null) {
+          _errorMessage = null;
+        }
+      });
+    }
+  }
+
   Future<void> _sendMessage() async {
     final text = _textController.text.trim();
-    if (text.isEmpty || _isLoading) return;
+    if (text.isEmpty || _isLoading || _isOffline) return;
 
     setState(() {
       _isLoading = true;
+      _errorMessage = null;
       _textController.clear();
     });
 
     try {
       await ref.read(carloseaeChatProvider.notifier).sendMessage(text);
+    } on TimeoutException catch (_) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Request timed out. Please check your connection and try again.';
+        });
+      }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${e.toString()}')),
-        );
+        final message = e.toString();
+        if (message.contains('Failed to send message') || message.contains('SocketException')) {
+          setState(() {
+            _errorMessage = 'Unable to reach Carloseae. Please check your internet connection.';
+          });
+        } else if (message.contains('API key')) {
+          setState(() {
+            _errorMessage = 'Carloseae is currently unavailable. Please try again later.';
+          });
+        } else {
+          setState(() {
+            _errorMessage = 'Something went wrong. Please try again.';
+          });
+        }
       }
     } finally {
       if (mounted) {
@@ -47,6 +88,12 @@ class _CarloseaeChatScreenState extends ConsumerState<CarloseaeChatScreen> {
         _scrollToBottom();
       }
     }
+  }
+
+  void _retryLastMessage() {
+    final messages = ref.read(carloseaeChatProvider);
+    if (messages.isEmpty) return;
+    _sendMessage();
   }
 
   void _scrollToBottom() {
@@ -64,11 +111,61 @@ class _CarloseaeChatScreenState extends ConsumerState<CarloseaeChatScreen> {
   @override
   Widget build(BuildContext context) {
     final messages = ref.watch(carloseaeChatProvider);
+    final theme = Theme.of(context);
+
+    Widget body;
+    if (_isOffline) {
+      body = Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.wifi_off_rounded, size: 64, color: theme.colorScheme.onSurfaceVariant),
+              const SizedBox(height: 24),
+              Text(
+                'You are offline',
+                style: theme.textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Carloseae needs an internet connection. Connect and try again.',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium,
+              ),
+            ],
+          ),
+        ),
+      );
+    } else if (messages.isEmpty && !_isLoading) {
+      body = Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Text(
+            'Welcome to Carloseae. Ask a Bible study question, '
+            'explore a topic, or dig into Adventist history. '
+            'I quote from verified sources and will say so when I can\'t.',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyLarge,
+          ),
+        ),
+      );
+    } else {
+      body = ListView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.all(16),
+        itemCount: messages.length,
+        itemBuilder: (context, index) {
+          final message = messages[index];
+          return _MessageBubble(message: message);
+        },
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Carloseae'),
-        backgroundColor: Theme.of(context).colorScheme.surface,
+        backgroundColor: theme.colorScheme.surface,
         actions: [
           IconButton(
             icon: const Icon(Icons.info_outline),
@@ -97,30 +194,29 @@ class _CarloseaeChatScreenState extends ConsumerState<CarloseaeChatScreen> {
       ),
       body: Column(
         children: [
-          Expanded(
-            child: messages.isEmpty
-                ? const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(24),
-                      child: Text(
-                        'Welcome to Carloseae. Ask a Bible study question, '
-                        'explore a topic, or dig into Adventist history. '
-                        'I quote from verified sources and will say so when I can\'t.',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 16),
-                      ),
+          Expanded(child: body),
+          if (_errorMessage != null)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              color: theme.colorScheme.errorContainer,
+              child: Row(
+                children: [
+                  Icon(Icons.error_outline, color: theme.colorScheme.onErrorContainer, size: 20),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _errorMessage!,
+                      style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onErrorContainer),
                     ),
-                  )
-                : ListView.builder(
-                    controller: _scrollController,
-                    padding: const EdgeInsets.all(16),
-                    itemCount: messages.length,
-                    itemBuilder: (context, index) {
-                      final message = messages[index];
-                      return _MessageBubble(message: message);
-                    },
                   ),
-          ),
+                  TextButton(
+                    onPressed: _retryLastMessage,
+                    child: Text('Retry', style: TextStyle(color: theme.colorScheme.onErrorContainer)),
+                  ),
+                ],
+              ),
+            ),
           if (_isLoading)
             const Padding(
               padding: EdgeInsets.all(8),
@@ -153,17 +249,18 @@ class _CarloseaeChatScreenState extends ConsumerState<CarloseaeChatScreen> {
               controller: _textController,
               maxLines: null,
               textInputAction: TextInputAction.send,
-              decoration: const InputDecoration(
-                hintText: 'Ask Carloseae a question...',
-                border: OutlineInputBorder(),
+              enabled: !_isOffline,
+              decoration: InputDecoration(
+                hintText: _isOffline ? 'No internet connection' : 'Ask Carloseae a question...',
+                border: const OutlineInputBorder(),
               ),
               onSubmitted: (_) => _sendMessage(),
             ),
           ),
           const SizedBox(width: 8),
           IconButton(
-            onPressed: _isLoading ? null : _sendMessage,
-            icon: const Icon(Icons.send),
+            onPressed: _isLoading || _isOffline ? null : _sendMessage,
+            icon: Icon(_isOffline ? Icons.wifi_off_rounded : Icons.send),
           ),
         ],
       ),

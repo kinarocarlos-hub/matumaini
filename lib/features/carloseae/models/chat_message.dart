@@ -15,21 +15,21 @@ class ChatMessage {
     this.egwRefs,
   });
 
-  ChatMessage copyWith({
-    String? id,
-    String? role,
-    String? content,
-    DateTime? timestamp,
-    List<String>? bibleRefs,
-    List<String>? egwRefs,
-  }) {
-    return ChatMessage(
-      id: id ?? this.id,
-      role: role ?? this.role,
-      content: content ?? this.content,
-      timestamp: timestamp ?? this.timestamp,
-      bibleRefs: bibleRefs ?? this.bibleRefs,
-      egwRefs: egwRefs ?? this.egwRefs,
-    );
-  }
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'role': role,
+        'content': content,
+        'timestamp': timestamp.toIso8601String(),
+        'bibleRefs': bibleRefs,
+        'egwRefs': egwRefs,
+      };
+
+  factory ChatMessage.fromJson(Map<String, dynamic> json) => ChatMessage(
+        id: json['id'] as String,
+        role: json['role'] as String,
+        content: json['content'] as String,
+        timestamp: DateTime.parse(json['timestamp'] as String),
+        bibleRefs: (json['bibleRefs'] as List<dynamic>?)?.map((e) => e as String).toList(),
+        egwRefs: (json['egwRefs'] as List<dynamic>?)?.map((e) => e as String).toList(),
+      );
 }
