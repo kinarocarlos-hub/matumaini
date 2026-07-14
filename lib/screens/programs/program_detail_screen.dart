@@ -88,7 +88,9 @@ class ProgramDetailScreen extends ConsumerWidget {
       separatorBuilder: (context, index) => const Divider(),
       itemBuilder: (context, index) {
         final item = items[index];
-        return ListTile(
+        return Material(
+          color: Colors.transparent,
+          child: ListTile(
           contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
           leading: CircleAvatar(
             backgroundColor: AppColors.gold.withValues(alpha: 0.2),
@@ -107,7 +109,8 @@ class ProgramDetailScreen extends ConsumerWidget {
           trailing: item['is_complete'] == 1
               ? Icon(Icons.check_circle, color: AppColors.gold)
               : Icon(Icons.radio_button_unchecked, color: AppColors.textSecondary),
-        );
+        ),
+      );
       },
     );
   }

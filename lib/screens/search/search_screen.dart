@@ -141,7 +141,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       itemCount: hymns.length,
       itemBuilder: (context, index) {
         final hymn = hymns[index];
-        return ListTile(
+        return Material(
+          color: Colors.transparent,
+          child: ListTile(
           title: Text(
             hymn.title,
             style: AppTypography.bodyLarge,
@@ -177,7 +179,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
               ),
             );
           },
-        );
+        ),
+      );
       },
     );
   }

@@ -84,7 +84,9 @@ class ProgramsScreen extends ConsumerWidget {
       separatorBuilder: (context, index) => const Divider(),
       itemBuilder: (context, index) {
         final program = programs[index];
-        return ListTile(
+        return Material(
+          color: Colors.transparent,
+          child: ListTile(
           contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
           title: Text(
             program['title'] ?? 'Untitled Program',
@@ -117,7 +119,8 @@ class ProgramsScreen extends ConsumerWidget {
               ),
             );
           },
-        );
+        ),
+      );
       },
     );
   }

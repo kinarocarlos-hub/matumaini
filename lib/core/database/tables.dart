@@ -217,3 +217,13 @@ class HymnNotes extends Table {
   IntColumn get createdAt => integer()();
   IntColumn get updatedAt => integer()();
 }
+
+class CarloseaeConversations extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get conversationId => text()();
+  TextColumn get role => text()();
+  TextColumn get content => text()();
+  IntColumn get timestamp => integer()();
+  TextColumn get bibleRefsJson => text().nullable()();
+  TextColumn get egwRefsJson => text().nullable()();
+}

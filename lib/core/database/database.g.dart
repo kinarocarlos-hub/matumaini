@@ -8392,6 +8392,386 @@ class HymnNotesCompanion extends UpdateCompanion<HymnNote> {
   }
 }
 
+class $CarloseaeConversationsTable extends CarloseaeConversations
+    with TableInfo<$CarloseaeConversationsTable, CarloseaeConversation> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CarloseaeConversationsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _conversationIdMeta =
+      const VerificationMeta('conversationId');
+  @override
+  late final GeneratedColumn<String> conversationId = GeneratedColumn<String>(
+      'conversation_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _roleMeta = const VerificationMeta('role');
+  @override
+  late final GeneratedColumn<String> role = GeneratedColumn<String>(
+      'role', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _contentMeta =
+      const VerificationMeta('content');
+  @override
+  late final GeneratedColumn<String> content = GeneratedColumn<String>(
+      'content', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _timestampMeta =
+      const VerificationMeta('timestamp');
+  @override
+  late final GeneratedColumn<int> timestamp = GeneratedColumn<int>(
+      'timestamp', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _bibleRefsJsonMeta =
+      const VerificationMeta('bibleRefsJson');
+  @override
+  late final GeneratedColumn<String> bibleRefsJson = GeneratedColumn<String>(
+      'bible_refs_json', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _egwRefsJsonMeta =
+      const VerificationMeta('egwRefsJson');
+  @override
+  late final GeneratedColumn<String> egwRefsJson = GeneratedColumn<String>(
+      'egw_refs_json', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        conversationId,
+        role,
+        content,
+        timestamp,
+        bibleRefsJson,
+        egwRefsJson
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'carloseae_conversations';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<CarloseaeConversation> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('conversation_id')) {
+      context.handle(
+          _conversationIdMeta,
+          conversationId.isAcceptableOrUnknown(
+              data['conversation_id']!, _conversationIdMeta));
+    } else if (isInserting) {
+      context.missing(_conversationIdMeta);
+    }
+    if (data.containsKey('role')) {
+      context.handle(
+          _roleMeta, role.isAcceptableOrUnknown(data['role']!, _roleMeta));
+    } else if (isInserting) {
+      context.missing(_roleMeta);
+    }
+    if (data.containsKey('content')) {
+      context.handle(_contentMeta,
+          content.isAcceptableOrUnknown(data['content']!, _contentMeta));
+    } else if (isInserting) {
+      context.missing(_contentMeta);
+    }
+    if (data.containsKey('timestamp')) {
+      context.handle(_timestampMeta,
+          timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta));
+    } else if (isInserting) {
+      context.missing(_timestampMeta);
+    }
+    if (data.containsKey('bible_refs_json')) {
+      context.handle(
+          _bibleRefsJsonMeta,
+          bibleRefsJson.isAcceptableOrUnknown(
+              data['bible_refs_json']!, _bibleRefsJsonMeta));
+    }
+    if (data.containsKey('egw_refs_json')) {
+      context.handle(
+          _egwRefsJsonMeta,
+          egwRefsJson.isAcceptableOrUnknown(
+              data['egw_refs_json']!, _egwRefsJsonMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CarloseaeConversation map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CarloseaeConversation(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      conversationId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}conversation_id'])!,
+      role: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}role'])!,
+      content: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}content'])!,
+      timestamp: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}timestamp'])!,
+      bibleRefsJson: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}bible_refs_json']),
+      egwRefsJson: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}egw_refs_json']),
+    );
+  }
+
+  @override
+  $CarloseaeConversationsTable createAlias(String alias) {
+    return $CarloseaeConversationsTable(attachedDatabase, alias);
+  }
+}
+
+class CarloseaeConversation extends DataClass
+    implements Insertable<CarloseaeConversation> {
+  final int id;
+  final String conversationId;
+  final String role;
+  final String content;
+  final int timestamp;
+  final String? bibleRefsJson;
+  final String? egwRefsJson;
+  const CarloseaeConversation(
+      {required this.id,
+      required this.conversationId,
+      required this.role,
+      required this.content,
+      required this.timestamp,
+      this.bibleRefsJson,
+      this.egwRefsJson});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['conversation_id'] = Variable<String>(conversationId);
+    map['role'] = Variable<String>(role);
+    map['content'] = Variable<String>(content);
+    map['timestamp'] = Variable<int>(timestamp);
+    if (!nullToAbsent || bibleRefsJson != null) {
+      map['bible_refs_json'] = Variable<String>(bibleRefsJson);
+    }
+    if (!nullToAbsent || egwRefsJson != null) {
+      map['egw_refs_json'] = Variable<String>(egwRefsJson);
+    }
+    return map;
+  }
+
+  CarloseaeConversationsCompanion toCompanion(bool nullToAbsent) {
+    return CarloseaeConversationsCompanion(
+      id: Value(id),
+      conversationId: Value(conversationId),
+      role: Value(role),
+      content: Value(content),
+      timestamp: Value(timestamp),
+      bibleRefsJson: bibleRefsJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(bibleRefsJson),
+      egwRefsJson: egwRefsJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(egwRefsJson),
+    );
+  }
+
+  factory CarloseaeConversation.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CarloseaeConversation(
+      id: serializer.fromJson<int>(json['id']),
+      conversationId: serializer.fromJson<String>(json['conversationId']),
+      role: serializer.fromJson<String>(json['role']),
+      content: serializer.fromJson<String>(json['content']),
+      timestamp: serializer.fromJson<int>(json['timestamp']),
+      bibleRefsJson: serializer.fromJson<String?>(json['bibleRefsJson']),
+      egwRefsJson: serializer.fromJson<String?>(json['egwRefsJson']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'conversationId': serializer.toJson<String>(conversationId),
+      'role': serializer.toJson<String>(role),
+      'content': serializer.toJson<String>(content),
+      'timestamp': serializer.toJson<int>(timestamp),
+      'bibleRefsJson': serializer.toJson<String?>(bibleRefsJson),
+      'egwRefsJson': serializer.toJson<String?>(egwRefsJson),
+    };
+  }
+
+  CarloseaeConversation copyWith(
+          {int? id,
+          String? conversationId,
+          String? role,
+          String? content,
+          int? timestamp,
+          Value<String?> bibleRefsJson = const Value.absent(),
+          Value<String?> egwRefsJson = const Value.absent()}) =>
+      CarloseaeConversation(
+        id: id ?? this.id,
+        conversationId: conversationId ?? this.conversationId,
+        role: role ?? this.role,
+        content: content ?? this.content,
+        timestamp: timestamp ?? this.timestamp,
+        bibleRefsJson:
+            bibleRefsJson.present ? bibleRefsJson.value : this.bibleRefsJson,
+        egwRefsJson: egwRefsJson.present ? egwRefsJson.value : this.egwRefsJson,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('CarloseaeConversation(')
+          ..write('id: $id, ')
+          ..write('conversationId: $conversationId, ')
+          ..write('role: $role, ')
+          ..write('content: $content, ')
+          ..write('timestamp: $timestamp, ')
+          ..write('bibleRefsJson: $bibleRefsJson, ')
+          ..write('egwRefsJson: $egwRefsJson')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id, conversationId, role, content, timestamp, bibleRefsJson, egwRefsJson);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CarloseaeConversation &&
+          other.id == this.id &&
+          other.conversationId == this.conversationId &&
+          other.role == this.role &&
+          other.content == this.content &&
+          other.timestamp == this.timestamp &&
+          other.bibleRefsJson == this.bibleRefsJson &&
+          other.egwRefsJson == this.egwRefsJson);
+}
+
+class CarloseaeConversationsCompanion
+    extends UpdateCompanion<CarloseaeConversation> {
+  final Value<int> id;
+  final Value<String> conversationId;
+  final Value<String> role;
+  final Value<String> content;
+  final Value<int> timestamp;
+  final Value<String?> bibleRefsJson;
+  final Value<String?> egwRefsJson;
+  const CarloseaeConversationsCompanion({
+    this.id = const Value.absent(),
+    this.conversationId = const Value.absent(),
+    this.role = const Value.absent(),
+    this.content = const Value.absent(),
+    this.timestamp = const Value.absent(),
+    this.bibleRefsJson = const Value.absent(),
+    this.egwRefsJson = const Value.absent(),
+  });
+  CarloseaeConversationsCompanion.insert({
+    this.id = const Value.absent(),
+    required String conversationId,
+    required String role,
+    required String content,
+    required int timestamp,
+    this.bibleRefsJson = const Value.absent(),
+    this.egwRefsJson = const Value.absent(),
+  })  : conversationId = Value(conversationId),
+        role = Value(role),
+        content = Value(content),
+        timestamp = Value(timestamp);
+  static Insertable<CarloseaeConversation> custom({
+    Expression<int>? id,
+    Expression<String>? conversationId,
+    Expression<String>? role,
+    Expression<String>? content,
+    Expression<int>? timestamp,
+    Expression<String>? bibleRefsJson,
+    Expression<String>? egwRefsJson,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (conversationId != null) 'conversation_id': conversationId,
+      if (role != null) 'role': role,
+      if (content != null) 'content': content,
+      if (timestamp != null) 'timestamp': timestamp,
+      if (bibleRefsJson != null) 'bible_refs_json': bibleRefsJson,
+      if (egwRefsJson != null) 'egw_refs_json': egwRefsJson,
+    });
+  }
+
+  CarloseaeConversationsCompanion copyWith(
+      {Value<int>? id,
+      Value<String>? conversationId,
+      Value<String>? role,
+      Value<String>? content,
+      Value<int>? timestamp,
+      Value<String?>? bibleRefsJson,
+      Value<String?>? egwRefsJson}) {
+    return CarloseaeConversationsCompanion(
+      id: id ?? this.id,
+      conversationId: conversationId ?? this.conversationId,
+      role: role ?? this.role,
+      content: content ?? this.content,
+      timestamp: timestamp ?? this.timestamp,
+      bibleRefsJson: bibleRefsJson ?? this.bibleRefsJson,
+      egwRefsJson: egwRefsJson ?? this.egwRefsJson,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (conversationId.present) {
+      map['conversation_id'] = Variable<String>(conversationId.value);
+    }
+    if (role.present) {
+      map['role'] = Variable<String>(role.value);
+    }
+    if (content.present) {
+      map['content'] = Variable<String>(content.value);
+    }
+    if (timestamp.present) {
+      map['timestamp'] = Variable<int>(timestamp.value);
+    }
+    if (bibleRefsJson.present) {
+      map['bible_refs_json'] = Variable<String>(bibleRefsJson.value);
+    }
+    if (egwRefsJson.present) {
+      map['egw_refs_json'] = Variable<String>(egwRefsJson.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CarloseaeConversationsCompanion(')
+          ..write('id: $id, ')
+          ..write('conversationId: $conversationId, ')
+          ..write('role: $role, ')
+          ..write('content: $content, ')
+          ..write('timestamp: $timestamp, ')
+          ..write('bibleRefsJson: $bibleRefsJson, ')
+          ..write('egwRefsJson: $egwRefsJson')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   _$AppDatabaseManager get managers => _$AppDatabaseManager(this);
@@ -8413,6 +8793,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ProgramItemsTable programItems = $ProgramItemsTable(this);
   late final $UserSettingsTable userSettings = $UserSettingsTable(this);
   late final $HymnNotesTable hymnNotes = $HymnNotesTable(this);
+  late final $CarloseaeConversationsTable carloseaeConversations =
+      $CarloseaeConversationsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -8432,7 +8814,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         worshipPrograms,
         programItems,
         userSettings,
-        hymnNotes
+        hymnNotes,
+        carloseaeConversations
       ];
 }
 
@@ -12375,6 +12758,177 @@ class $$HymnNotesTableOrderingComposer
   }
 }
 
+typedef $$CarloseaeConversationsTableInsertCompanionBuilder
+    = CarloseaeConversationsCompanion Function({
+  Value<int> id,
+  required String conversationId,
+  required String role,
+  required String content,
+  required int timestamp,
+  Value<String?> bibleRefsJson,
+  Value<String?> egwRefsJson,
+});
+typedef $$CarloseaeConversationsTableUpdateCompanionBuilder
+    = CarloseaeConversationsCompanion Function({
+  Value<int> id,
+  Value<String> conversationId,
+  Value<String> role,
+  Value<String> content,
+  Value<int> timestamp,
+  Value<String?> bibleRefsJson,
+  Value<String?> egwRefsJson,
+});
+
+class $$CarloseaeConversationsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $CarloseaeConversationsTable,
+    CarloseaeConversation,
+    $$CarloseaeConversationsTableFilterComposer,
+    $$CarloseaeConversationsTableOrderingComposer,
+    $$CarloseaeConversationsTableProcessedTableManager,
+    $$CarloseaeConversationsTableInsertCompanionBuilder,
+    $$CarloseaeConversationsTableUpdateCompanionBuilder> {
+  $$CarloseaeConversationsTableTableManager(
+      _$AppDatabase db, $CarloseaeConversationsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          filteringComposer: $$CarloseaeConversationsTableFilterComposer(
+              ComposerState(db, table)),
+          orderingComposer: $$CarloseaeConversationsTableOrderingComposer(
+              ComposerState(db, table)),
+          getChildManagerBuilder: (p) =>
+              $$CarloseaeConversationsTableProcessedTableManager(p),
+          getUpdateCompanionBuilder: ({
+            Value<int> id = const Value.absent(),
+            Value<String> conversationId = const Value.absent(),
+            Value<String> role = const Value.absent(),
+            Value<String> content = const Value.absent(),
+            Value<int> timestamp = const Value.absent(),
+            Value<String?> bibleRefsJson = const Value.absent(),
+            Value<String?> egwRefsJson = const Value.absent(),
+          }) =>
+              CarloseaeConversationsCompanion(
+            id: id,
+            conversationId: conversationId,
+            role: role,
+            content: content,
+            timestamp: timestamp,
+            bibleRefsJson: bibleRefsJson,
+            egwRefsJson: egwRefsJson,
+          ),
+          getInsertCompanionBuilder: ({
+            Value<int> id = const Value.absent(),
+            required String conversationId,
+            required String role,
+            required String content,
+            required int timestamp,
+            Value<String?> bibleRefsJson = const Value.absent(),
+            Value<String?> egwRefsJson = const Value.absent(),
+          }) =>
+              CarloseaeConversationsCompanion.insert(
+            id: id,
+            conversationId: conversationId,
+            role: role,
+            content: content,
+            timestamp: timestamp,
+            bibleRefsJson: bibleRefsJson,
+            egwRefsJson: egwRefsJson,
+          ),
+        ));
+}
+
+class $$CarloseaeConversationsTableProcessedTableManager
+    extends ProcessedTableManager<
+        _$AppDatabase,
+        $CarloseaeConversationsTable,
+        CarloseaeConversation,
+        $$CarloseaeConversationsTableFilterComposer,
+        $$CarloseaeConversationsTableOrderingComposer,
+        $$CarloseaeConversationsTableProcessedTableManager,
+        $$CarloseaeConversationsTableInsertCompanionBuilder,
+        $$CarloseaeConversationsTableUpdateCompanionBuilder> {
+  $$CarloseaeConversationsTableProcessedTableManager(super.$state);
+}
+
+class $$CarloseaeConversationsTableFilterComposer
+    extends FilterComposer<_$AppDatabase, $CarloseaeConversationsTable> {
+  $$CarloseaeConversationsTableFilterComposer(super.$state);
+  ColumnFilters<int> get id => $state.composableBuilder(
+      column: $state.table.id,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get conversationId => $state.composableBuilder(
+      column: $state.table.conversationId,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get role => $state.composableBuilder(
+      column: $state.table.role,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get content => $state.composableBuilder(
+      column: $state.table.content,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<int> get timestamp => $state.composableBuilder(
+      column: $state.table.timestamp,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get bibleRefsJson => $state.composableBuilder(
+      column: $state.table.bibleRefsJson,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+
+  ColumnFilters<String> get egwRefsJson => $state.composableBuilder(
+      column: $state.table.egwRefsJson,
+      builder: (column, joinBuilders) =>
+          ColumnFilters(column, joinBuilders: joinBuilders));
+}
+
+class $$CarloseaeConversationsTableOrderingComposer
+    extends OrderingComposer<_$AppDatabase, $CarloseaeConversationsTable> {
+  $$CarloseaeConversationsTableOrderingComposer(super.$state);
+  ColumnOrderings<int> get id => $state.composableBuilder(
+      column: $state.table.id,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get conversationId => $state.composableBuilder(
+      column: $state.table.conversationId,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get role => $state.composableBuilder(
+      column: $state.table.role,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get content => $state.composableBuilder(
+      column: $state.table.content,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<int> get timestamp => $state.composableBuilder(
+      column: $state.table.timestamp,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get bibleRefsJson => $state.composableBuilder(
+      column: $state.table.bibleRefsJson,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+
+  ColumnOrderings<String> get egwRefsJson => $state.composableBuilder(
+      column: $state.table.egwRefsJson,
+      builder: (column, joinBuilders) =>
+          ColumnOrderings(column, joinBuilders: joinBuilders));
+}
+
 class _$AppDatabaseManager {
   final _$AppDatabase _db;
   _$AppDatabaseManager(this._db);
@@ -12408,4 +12962,7 @@ class _$AppDatabaseManager {
       $$UserSettingsTableTableManager(_db, _db.userSettings);
   $$HymnNotesTableTableManager get hymnNotes =>
       $$HymnNotesTableTableManager(_db, _db.hymnNotes);
+  $$CarloseaeConversationsTableTableManager get carloseaeConversations =>
+      $$CarloseaeConversationsTableTableManager(
+          _db, _db.carloseaeConversations);
 }

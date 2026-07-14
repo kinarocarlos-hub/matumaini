@@ -25,6 +25,7 @@ part 'database.g.dart';
   UserSettings,
   HymnNotes,
   Persons,
+  CarloseaeConversations,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());

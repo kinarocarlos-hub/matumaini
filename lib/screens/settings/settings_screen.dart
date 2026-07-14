@@ -163,23 +163,26 @@ class _SettingsItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
+    return Material(
+      color: Colors.transparent,
+      child: ListTile(
       leading: Icon(icon, color: AppColors.gold, size: 24),
       title: Text(title, style: AppTypography.bodyMedium),
       subtitle: Text(subtitle, style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
       trailing: isNavigable
           ? Icon(Icons.chevron_right, color: AppColors.textSecondary, size: 20)
           : null,
-      onTap: onTap ??
-          () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('$title settings coming in next release'),
-                backgroundColor: AppColors.gold,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          },
-    );
+          onTap: onTap ??
+              () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('$title settings coming in next release'),
+                    backgroundColor: AppColors.gold,
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              },
+        ),
+      );
   }
 }

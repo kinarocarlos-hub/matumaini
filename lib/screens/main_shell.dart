@@ -5,6 +5,7 @@ import 'package:matumaini/screens/home/home_screen.dart';
 import 'package:matumaini/screens/search/search_screen.dart';
 import 'package:matumaini/screens/programs/programs_screen.dart';
 import 'package:matumaini/screens/settings/settings_screen.dart';
+import 'package:matumaini/features/carloseae/screens/carloseae_chat_screen.dart';
 
 class MainShell extends ConsumerStatefulWidget {
   const MainShell({super.key});
@@ -20,6 +21,7 @@ class _MainShellState extends ConsumerState<MainShell> {
     HomeScreen(),
     SearchScreen(),
     ProgramsScreen(),
+    CarloseaeChatScreen(),
     SettingsScreen(),
   ];
 
@@ -56,6 +58,11 @@ class _MainShellState extends ConsumerState<MainShell> {
             icon: Icon(Icons.event),
             activeIcon: Icon(Icons.event_available),
             label: 'Programs',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.chat),
+            activeIcon: Icon(Icons.chat_bubble),
+            label: 'Carloseae',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
