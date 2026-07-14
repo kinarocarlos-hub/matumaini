@@ -194,10 +194,10 @@ class ProgramDetailScreen extends ConsumerWidget {
             onPressed: () async {
               if (titleController.text.isNotEmpty) {
                 final db = ref.read(databaseProvider);
-                final countResult = await db.customSelectOne('''
+                final countResult = await db.customSelect('''
                   SELECT COUNT(*) as count FROM program_items WHERE program_id = ?
-                ''', variables: [Variable(programId)]);
-                final displayOrder = (countResult?['count'] as int? ?? 0) + 1;
+                ''', variables: [Variable(programId)]).getSingleOrNull();
+                final displayOrder = (countResult?.data['count'] as int? ?? 0) + 1;
 
                 final variables = <Variable>[
                   Variable(programId),

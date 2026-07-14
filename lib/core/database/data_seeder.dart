@@ -9,8 +9,8 @@ class DataSeeder {
   DataSeeder(this.db);
 
   Future<bool> isDatabaseEmpty() async {
-    final count = await db.customSelectOne('SELECT COUNT(*) as count FROM hymns');
-    return (count?['count'] as int) == 0;
+    final count = await db.customSelect('SELECT COUNT(*) as count FROM hymns').getSingle();
+    return (count.data['count'] as int) == 0;
   }
 
   Future<void> seedIfEmpty() async {

@@ -50,8 +50,8 @@ final programsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async 
            created_at as createdAt, is_template as isTemplate
     FROM worship_programs
     ORDER BY date DESC
-  ''');
-  return results;
+  ''').get();
+  return results.map((row) => row.data).toList();
 });
 
 final programItemsProvider = FutureProvider.family<List<Map<String, dynamic>>, int>((ref, programId) async {
@@ -63,6 +63,6 @@ final programItemsProvider = FutureProvider.family<List<Map<String, dynamic>>, i
     FROM program_items
     WHERE program_id = ?
     ORDER BY display_order
-  ''', variables: [Variable(programId)]);
-  return results;
+  ''', variables: [Variable(programId)]).get();
+  return results.map((row) => row.data).toList();
 });

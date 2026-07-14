@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:drift/drift.dart' hide Column;
-import 'package:matumaini/core/database/database.dart';
+import 'package:matumaini/core/database/database.dart' hide Hymn, HymnVerse;
 import 'package:matumaini/models/hymn.dart';
 import 'package:matumaini/models/hymn_verse.dart';
 
@@ -21,45 +21,43 @@ class HymnRepository {
              created_at as createdAt, updated_at as updatedAt
       FROM hymns
       ORDER BY collection_id, hymn_number
-    ''');
+    ''').get();
 
-    return results.map((row) => _toModel(row)).toList();
+    return results.map((row) => _toModel(row.data)).toList();
   }
 
   Future<Hymn?> getHymnById(int id) async {
-    final data = await db.customSelectOne('''
+    final data = await db.customSelect('''
       SELECT id, collection_id as collectionId, hymn_number as hymnNumber,
              title, first_line as firstLine, tune_name as tuneName, meter,
-             scripture_refs as scriptureRefs, has_midi as hasMidi,
-             has_chords as hasChords, midi_asset_path as midiAssetPath,
+             has_midi as hasMidi, has_chords as hasChords, midi_asset_path as midiAssetPath,
              dialect, source_attribution as sourceAttribution,
              is_community_contributed as isCommunityContributed,
              use_count as useCount, last_used as lastUsed,
              created_at as createdAt, updated_at as updatedAt
       FROM hymns
       WHERE id = ?
-    ''', variables: [Variable(id)]);
+    ''', variables: [Variable(id)]).getSingleOrNull();
 
     if (data == null) return null;
-    return _toModel(data);
+    return _toModel(data.data);
   }
 
   Future<Hymn?> getHymnByNumber(int number, int collectionId) async {
-    final data = await db.customSelectOne('''
+    final data = await db.customSelect('''
       SELECT id, collection_id as collectionId, hymn_number as hymnNumber,
              title, first_line as firstLine, tune_name as tuneName, meter,
-             scripture_refs as scriptureRefs, has_midi as hasMidi,
-             has_chords as hasChords, midi_asset_path as midiAssetPath,
+             has_midi as hasMidi, has_chords as hasChords, midi_asset_path as midiAssetPath,
              dialect, source_attribution as sourceAttribution,
              is_community_contributed as isCommunityContributed,
              use_count as useCount, last_used as lastUsed,
              created_at as createdAt, updated_at as updatedAt
       FROM hymns
       WHERE hymn_number = ? AND collection_id = ?
-    ''', variables: [Variable(number), Variable(collectionId)]);
+    ''', variables: [Variable(number), Variable(collectionId)]).getSingleOrNull();
 
     if (data == null) return null;
-    return _toModel(data);
+    return _toModel(data.data);
   }
 
   Future<List<HymnVerse>> getVersesForHymn(int hymnId) async {
@@ -71,9 +69,9 @@ class HymnRepository {
       FROM hymn_verses
       WHERE hymn_id = ?
       ORDER BY display_order
-    ''', variables: [Variable(hymnId)]);
+    ''', variables: [Variable(hymnId)]).get();
 
-    return results.map((row) => _verseToModel(row)).toList();
+    return results.map((row) => _verseToModel(row.data)).toList();
   }
 
   Future<List<Hymn>> searchHymns(String query) async {
@@ -92,9 +90,9 @@ class HymnRepository {
       WHERE fts MATCH ?
       ORDER BY rank
       LIMIT 50
-    ''', variables: [Variable(query)]);
+    ''', variables: [Variable(query)]).get();
 
-    return results.map((row) => _toModel(row)).toList();
+    return results.map((row) => _toModel(row.data)).toList();
   }
 
   Future<void> incrementUseCount(int hymnId) async {

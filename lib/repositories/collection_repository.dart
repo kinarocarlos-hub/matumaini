@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
 import 'package:drift/drift.dart' hide Column;
-import 'package:matumaini/core/database/database.dart';
+import 'package:matumaini/core/database/database.dart' hide Collection;
 import 'package:matumaini/models/collection.dart';
 
 class CollectionRepository {
@@ -19,13 +19,13 @@ class CollectionRepository {
              license_expiry as licenseExpiry, display_order as displayOrder
       FROM collections
       ORDER BY display_order
-    ''');
+    ''').get();
 
-    return results.map((row) => _toModel(row)).toList();
+    return results.map((row) => _toModel(row.data)).toList();
   }
 
   Future<Collection?> getCollectionByCode(String code) async {
-    final data = await db.customSelectOne('''
+    final data = await db.customSelect('''
       SELECT id, code, name, name_native as nameNative, language_code as languageCode,
              language_name_english as languageNameEnglish, language_name_native as languageNameNative,
              font_family as fontFamily, special_characters as specialCharacters, tier,
@@ -35,10 +35,10 @@ class CollectionRepository {
              license_expiry as licenseExpiry, display_order as displayOrder
       FROM collections
       WHERE code = ?
-    ''', variables: [Variable(code)]);
+    ''', variables: [Variable(code)]).getSingleOrNull();
 
     if (data == null) return null;
-    return _toModel(data);
+    return _toModel(data.data);
   }
 
   Collection _toModel(Map<String, dynamic> data) {

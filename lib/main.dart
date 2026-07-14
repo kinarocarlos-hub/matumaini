@@ -11,7 +11,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
     final db = AppDatabase();
-    await db.onCreate();
     final seeder = DataSeeder(db);
     await seeder.seedIfEmpty();
     runApp(ProviderScope(overrides: [
